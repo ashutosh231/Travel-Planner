@@ -2,7 +2,7 @@ import { VscChromeClose } from "react-icons/vsc";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Logo from "/Applications/XAMPP/xamppfiles/htdocs/Travel-Planner/Frontend/src/assets/Logo.png";
+import Logo from "/Users/aryanraj/Tour_Planner/projectX/Frontend/src/assets/Logo.png";
 
 export default function Navbar() {
   const [navbarState, setNavbarState] = useState(false);

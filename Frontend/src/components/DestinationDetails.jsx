@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Testimonials from "./Testimonials";
 import { FaArrowLeft, FaStar, FaMapMarkerAlt, FaClock, FaMoneyBillWave, FaHeart } from "react-icons/fa";
 import { IoIosPeople } from "react-icons/io";
+import { destinations } from "../data/Recommend";
 
 export default function DestinationDetails() {
   const [destination, setDestination] = useState(null);
@@ -12,6 +13,7 @@ export default function DestinationDetails() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const data = sessionStorage.getItem("selectedDestination");
     if (data) {
       setDestination(JSON.parse(data));
@@ -154,16 +156,16 @@ export default function DestinationDetails() {
               <div className="pt-4">
                 <h3 className="text-xl font-semibold mb-3 text-pink-400">Trip Highlights</h3>
                 <ul className="space-y-2">
-                  {Array(3).fill().map((_, i) => (
+                  {destination.tripHighlights && destination.tripHighlights.map((highlight, index) => (
                     <motion.li 
-                      key={i}
+                      key={index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + i * 0.1 }}
+                      transition={{ delay: 0.3 + index * 0.1 }}
                       className="flex items-start"
                     >
                       <span className="inline-block w-1.5 h-1.5 mt-2.5 mr-2 bg-pink-500 rounded-full"></span>
-                      <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.</span>
+                      <span>{highlight}</span>
                     </motion.li>
                   ))}
                 </ul>

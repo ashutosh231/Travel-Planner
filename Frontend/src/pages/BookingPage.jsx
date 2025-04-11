@@ -1,212 +1,3 @@
-// import { useNavigate } from "react-router-dom";
-// import { useEffect, useState } from "react";
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
-// import { motion } from "framer-motion";
-
-// export default function BookingPage() {
-//   const navigate = useNavigate();
-//   const [selectedDestination, setSelectedDestination] = useState(null);
-//   const [selectedAccommodation, setSelectedAccommodation] = useState(null);
-//   const [checkInDate, setCheckInDate] = useState(new Date());
-//   const [checkOutDate, setCheckOutDate] = useState(new Date());
-//   const [numNights, setNumNights] = useState(1);
-//   const [members, setMembers] = useState([{ name: "", age: "" }]);
-
-//   const handleMemberChange = (index, field, value) => {
-//     const updatedMembers = [...members];
-//     updatedMembers[index][field] = value;
-//     setMembers(updatedMembers);
-//   };
-
-//   const addMember = () => {
-//     setMembers([...members, { name: "", age: "" }]);
-//   };
-
-//   const removeMember = (index) => {
-//     const updatedMembers = members.filter((_, i) => i !== index);
-//     setMembers(updatedMembers);
-//   };
-
-//   useEffect(() => { 
-//     if (checkInDate && checkOutDate) {
-//       const timeDiff = checkOutDate - checkInDate;
-//       const nights = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-//       setNumNights(nights > 0 ? nights : 1);
-//     }
-//   }, [checkInDate, checkOutDate]);
-
-//   useEffect(() => {
-//     const storedDestination = sessionStorage.getItem("selectedDestination");
-//     const storedAccommodation = sessionStorage.getItem("selectedAccommodation");
-
-//     if (storedDestination) setSelectedDestination(JSON.parse(storedDestination));
-//     if (storedAccommodation) setSelectedAccommodation(JSON.parse(storedAccommodation));
-//   }, []);
-
-//   return (
-//     <div className="flex flex-col min-h-screen bg-richbalck-900 text-white">
-//       <div className="flex-grow flex flex-col items-center p-6">
-//         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8">
-//           {/* Destination Section */}
-//           <motion.div
-//             initial={{ opacity: 0, y: 50 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ duration: 0.5 }}
-//             className="bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-3xl shadow-2xl p-8 transition-transform hover:scale-105 hover:shadow-purple-500/50"
-//           >
-//             <h2 className="text-3xl font-bold text-white text-center mb-4">Selected Destination</h2>
-//             {selectedDestination ? (
-//               <>
-//                 <img
-//                   src={selectedDestination.image}
-//                   alt={selectedDestination.title}
-//                   className="w-full h-48 object-cover rounded-2xl shadow-lg hover:shadow-xl transition-transform hover:scale-105"
-//                 />
-//                 <h3 className="text-2xl font-semibold text-white mt-4">{selectedDestination.title}</h3>
-//                 <p className="text-lg text-gray-200"><strong>Location:</strong> {selectedDestination?.location || "Not Available"}</p>
-//                 <p className="text-gray-300"><strong>Description:</strong> {selectedDestination?.description || "No description provided"}</p>
-//                 <p className="text-xl font-bold text-green-400 mt-2">
-//                   {selectedDestination?.cost ? `Rs.${selectedDestination.cost}` : "Price not available"}
-//                 </p>
-//               </>
-//             ) : (
-//               <button
-//                 className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg rounded-full shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all hover:scale-105"
-//                 onClick={() => navigate("/recommend")}
-//               >
-//                 Choose Destination
-//               </button>
-//             )}
-//           </motion.div>
-
-//           {/* Accommodation Section */}
-//           <motion.div
-//             initial={{ opacity: 0, y: 50 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ duration: 0.5, delay: 0.2 }}
-//             className="bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-3xl shadow-2xl p-8 transition-transform hover:scale-105 hover:shadow-purple-500/50"
-//           >
-//             <h2 className="text-3xl font-bold text-white text-center mb-4">Selected Accommodation</h2>
-//             {selectedAccommodation ? (
-//               <>
-//                 <img
-//                   src={selectedAccommodation.image}
-//                   alt={selectedAccommodation.title}
-//                   className="w-full h-48 object-cover rounded-2xl shadow-lg hover:shadow-xl transition-transform hover:scale-105"
-//                 />
-//                 <h3 className="text-2xl font-semibold text-white mt-4">{selectedAccommodation.title}</h3>
-//                 <p className="text-lg text-gray-200"><strong>Location:</strong> {selectedAccommodation?.location || "Not Available"}</p>
-//                 <p className="text-gray-300"><strong>Description:</strong> {selectedAccommodation?.description || "No description provided"}</p>
-
-//                 {/* Check-in and Check-out Date Pickers */}
-//                 <div className="mt-4 space-y-4">
-//                   <div>
-//                     <label className="block text-lg font-semibold text-gray-200">Check-in Date:</label>
-//                     <DatePicker
-//                       selected={checkInDate}
-//                       onChange={(date) => setCheckInDate(date)}
-//                       minDate={new Date()}
-//                       className="mt-2 p-2 border rounded-md text-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
-//                     />
-//                   </div>
-//                   <div>
-//                     <label className="block text-lg font-semibold text-gray-200">Check-out Date:</label>
-//                     <DatePicker
-//                       selected={checkOutDate}
-//                       onChange={(date) => setCheckOutDate(date)}
-//                       minDate={checkInDate}
-//                       className="mt-2 p-2 border rounded-md text-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
-//                     />
-//                   </div>
-//                 </div>
-
-//                 <p className="text-lg text-gray-200 mt-4"><strong>Number of Nights:</strong> {numNights}</p>
-//                 <p className="text-2xl font-bold text-green-400 mt-4">
-//                   Total Cost:  Rs.{selectedAccommodation?.cost ? (selectedAccommodation.cost * numNights).toFixed(2) : "Price not available"}
-//                 </p>
-//               </>
-//             ) : (
-//               <button
-//                 className="w-full py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-bold text-lg rounded-full shadow-lg hover:from-green-700 hover:to-teal-700 transition-all hover:scale-105"
-//                 onClick={() => navigate("/accommodation")}
-//               >
-//                 Choose Accommodation
-//               </button>
-//             )}
-//           </motion.div>
-//         </div>
-
-//         {/* Add Members Section */}
-//         <div className="mt-6">
-//           <h3 className="text-xl font-bold text-white mb-4">Add Members</h3>
-//           {members.map((member, index) => (
-//             <div key={index} className="flex gap-4 mb-4">
-//               <input
-//                 type="text"
-//                 placeholder="Name"
-//                 value={member.name}
-//                 onChange={(e) => handleMemberChange(index, "name", e.target.value)}
-//                 className="p-2 rounded bg-gray-900 text-white w-1/2"
-//               />
-//               <input
-//                 type="number"
-//                 placeholder="Age"
-//                 value={member.age}
-//                 onChange={(e) => handleMemberChange(index, "age", e.target.value)}
-//                 className="p-2 rounded bg-gray-900 text-white w-1/4"
-//               />
-//               <button
-//                 onClick={() => removeMember(index)}
-//                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-//               >
-//                 Remove
-//               </button>
-//             </div>
-//           ))}
-//           <button
-//             onClick={addMember}
-//             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-//           >
-//             Add Member
-//           </button>
-//         </div>
-
-//         {/* Buttons Section */}
-//         <motion.div
-//           initial={{ opacity: 0, y: 50 }}
-//           animate={{ opacity: 1, y: 0 }}
-//           transition={{ duration: 0.5, delay: 0.4 }}
-//           className="mt-8 flex justify-center gap-4"
-//         >
-//           <button
-//             className="py-4 px-6 bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold text-lg rounded-full shadow-lg hover:from-red-700 hover:to-pink-700 transition-all hover:scale-105"
-//             onClick={() => {
-//               setSelectedDestination(null);
-//               setSelectedAccommodation(null);
-//               sessionStorage.removeItem("selectedDestination");
-//               sessionStorage.removeItem("selectedAccommodation");
-//             }}
-//           >
-//             Reset Selections
-//           </button>
-
-//           <button
-//             className={`py-4 px-6 text-white font-bold text-lg rounded-full shadow-lg transition-all hover:scale-105
-//               ${selectedDestination && selectedAccommodation ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" : "bg-gray-400 cursor-pointer"}`}
-//             disabled={!selectedDestination || !selectedAccommodation}
-//             onClick={() => {
-//               sessionStorage.setItem("members", JSON.stringify(members));
-//               navigate("/payment");
-//             }}
-//           >
-//             Proceed to Payment
-//           </button>
-//         </motion.div>
-//       </div>
-//     </div>
-//   );
-// }
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
@@ -246,125 +37,284 @@ export default function BookingPage() {
     if (storedAccommodation) setSelectedAccommodation(JSON.parse(storedAccommodation));
   }, []);
 
+  const pageVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { staggerChildren: 0.15 } },
+  };
+
+  const itemVariants = {
+    initial: { opacity: 0, y: 30 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
-      <div className="flex-grow flex flex-col items-center p-8">
-        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10">
+    <motion.div 
+      initial="initial"
+      animate="animate"
+      variants={pageVariants}
+      className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black text-white"
+    >
+      {/* Header Section */}
+      <div className="w-full bg-black/30 backdrop-blur-md py-6 border-b border-white/10 shadow-xl mb-8">
+        <div className="max-w-7xl mx-auto px-6">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+            Complete Your Booking
+          </h1>
+          <p className="text-gray-300 mt-2 text-lg">Just a few more steps to confirm your dream vacation</p>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {/* Destination Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-white/20 transition-transform hover:scale-105"
-          >
-            <h2 className="text-3xl font-extrabold text-center text-white mb-5">Selected Destination</h2>
-            {selectedDestination ? (
-              <>
-                <img src={selectedDestination.image} alt={selectedDestination.title} className="w-full h-48 object-cover rounded-xl shadow-lg mb-4" />
-                <h3 className="text-2xl font-semibold">{selectedDestination.title}</h3>
-                <p className="text-sm text-gray-300 mt-1"><strong>Location:</strong> {selectedDestination?.location}</p>
-                <p className="text-gray-400 text-sm mt-2">{selectedDestination?.description}</p>
-                <p className="text-xl text-green-400 mt-4 font-semibold">Rs. {selectedDestination?.cost}</p>
-              </>
-            ) : (
-              <button
-                onClick={() => navigate("/recommend")}
-                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-full shadow hover:scale-105"
-              >
-                Choose Destination
-              </button>
-            )}
+          <motion.div variants={itemVariants} className="h-full">
+            <div className="relative group h-full overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/40 to-purple-900/40 backdrop-blur-xl border border-white/20 shadow-2xl transition duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+              <div className="p-8">
+                <h2 className="text-3xl font-extrabold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400">
+                  Destination
+                </h2>
+                
+                {selectedDestination ? (
+                  <div className="space-y-6">
+                    <div className="relative overflow-hidden rounded-2xl">
+                      <img 
+                        src={selectedDestination.image}
+                        alt={selectedDestination.title}
+                        className="w-full h-64 object-cover transform transition duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                      <div className="absolute bottom-0 left-0 p-4">
+                        <span className="px-3 py-1 text-xs font-medium bg-blue-600 text-white rounded-full">
+                          Featured
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-3xl font-bold">{selectedDestination.title}</h3>
+                      <div className="flex items-center mt-2">
+                        <svg className="w-5 h-5 text-blue-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-blue-200">{selectedDestination.location}</p>
+                      </div>
+                      
+                      <p className="mt-4 text-gray-300 leading-relaxed">
+                        {selectedDestination.description}
+                      </p>
+                      
+                      <div className="mt-6 p-4 rounded-xl bg-white/10 backdrop-blur-sm">
+                        <div className="flex justify-between items-center">
+                          <p className="text-gray-300">Price</p>
+                          <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-blue-400">
+                            Rs. {selectedDestination.cost}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 space-y-6">
+                    <div className="w-24 h-24 rounded-full bg-blue-600/20 flex items-center justify-center">
+                      <svg className="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                      </svg>
+                    </div>
+                    <p className="text-xl text-gray-300 text-center">
+                      Pick your dream destination to continue
+                    </p>
+                    <button
+                      onClick={() => navigate("/recommend")}
+                      className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-blue-500/25 transition duration-300 transform hover:-translate-y-1"
+                    >
+                      Choose Destination
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </motion.div>
 
           {/* Accommodation Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-white/20 transition-transform hover:scale-105"
-          >
-            <h2 className="text-3xl font-extrabold text-center text-white mb-5">Selected Accommodation</h2>
-            {selectedAccommodation ? (
-              <>
-                <img src={selectedAccommodation.image} alt={selectedAccommodation.title} className="w-full h-48 object-cover rounded-xl shadow-lg mb-4" />
-                <h3 className="text-2xl font-semibold">{selectedAccommodation.title}</h3>
-                <p className="text-sm text-gray-300 mt-1"><strong>Location:</strong> {selectedAccommodation?.location}</p>
-                <p className="text-gray-400 text-sm mt-2">{selectedAccommodation?.description}</p>
-
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Check-in:</label>
-                    <DatePicker
-                      selected={checkInDate}
-                      onChange={setCheckInDate}
-                      minDate={new Date()}
-                      className="w-full mt-1 p-2 rounded-md bg-gray-800 text-white border border-gray-700"
-                    />
+          <motion.div variants={itemVariants} className="h-full">
+            <div className="relative group h-full overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/40 to-pink-900/40 backdrop-blur-xl border border-white/20 shadow-2xl transition duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-600/10 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+              <div className="p-8">
+                <h2 className="text-3xl font-extrabold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-400">
+                  Accommodation
+                </h2>
+                
+                {selectedAccommodation ? (
+                  <div className="space-y-6">
+                    <div className="relative overflow-hidden rounded-2xl">
+                      <img 
+                        src={selectedAccommodation.image}
+                        alt={selectedAccommodation.title}
+                        className="w-full h-64 object-cover transform transition duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                      <div className="absolute bottom-0 left-0 p-4">
+                        <span className="px-3 py-1 text-xs font-medium bg-purple-600 text-white rounded-full">
+                          Premium
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-3xl font-bold">{selectedAccommodation.title}</h3>
+                      <div className="flex items-center mt-2">
+                        <svg className="w-5 h-5 text-purple-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-purple-200">{selectedAccommodation.location}</p>
+                      </div>
+                      
+                      <p className="mt-4 text-gray-300 leading-relaxed">
+                        {selectedAccommodation.description}
+                      </p>
+                      
+                      <div className="mt-6 space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Check-in</label>
+                            <DatePicker
+                              selected={checkInDate}
+                              onChange={setCheckInDate}
+                              minDate={new Date()}
+                              className="w-full p-3 rounded-xl bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Check-out</label>
+                            <DatePicker
+                              selected={checkOutDate}
+                              onChange={setCheckOutDate}
+                              minDate={checkInDate}
+                              className="w-full p-3 rounded-xl bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="text-gray-300">Stay duration</p>
+                              <p className="text-xl font-bold">{numNights} {numNights === 1 ? 'night' : 'nights'}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-gray-300">Total price</p>
+                              <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-teal-400">
+                                Rs. {(selectedAccommodation.cost * numNights).toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium">Check-out:</label>
-                    <DatePicker
-                      selected={checkOutDate}
-                      onChange={setCheckOutDate}
-                      minDate={checkInDate}
-                      className="w-full mt-1 p-2 rounded-md bg-gray-800 text-white border border-gray-700"
-                    />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 space-y-6">
+                    <div className="w-24 h-24 rounded-full bg-purple-600/20 flex items-center justify-center">
+                      <svg className="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
+                    </div>
+                    <p className="text-xl text-gray-300 text-center">
+                      Choose where you'd like to stay
+                    </p>
+                    <button
+                      onClick={() => navigate("/accommodation")}
+                      className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-purple-500/25 transition duration-300 transform hover:-translate-y-1"
+                    >
+                      Choose Accommodation
+                    </button>
                   </div>
-                </div>
-
-                <p className="text-md mt-4 text-gray-300">Nights: <span className="font-bold">{numNights}</span></p>
-                <p className="text-2xl font-bold text-green-400 mt-2">Total: Rs.{(selectedAccommodation.cost * numNights).toFixed(2)}</p>
-              </>
-            ) : (
-              <button
-                onClick={() => navigate("/accommodation")}
-                className="w-full py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white font-bold rounded-full shadow hover:scale-105"
-              >
-                Choose Accommodation
-              </button>
-            )}
+                )}
+              </div>
+            </div>
           </motion.div>
         </div>
 
-        {/* Member List */}
-        <div className="w-full max-w-4xl mt-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6">
-          <h3 className="text-2xl font-bold mb-6 text-white">Group Members</h3>
-          {members.map((member, index) => (
-            <div key={index} className="flex gap-4 mb-4 items-center">
-              <input
-                type="text"
-                placeholder="Name"
-                value={member.name}
-                onChange={(e) => handleMemberChange(index, "name", e.target.value)}
-                className="flex-1 p-2 rounded-md bg-gray-900 text-white border border-gray-700"
-              />
-              <input
-                type="number"
-                placeholder="Age"
-                value={member.age}
-                onChange={(e) => handleMemberChange(index, "age", e.target.value)}
-                className="w-24 p-2 rounded-md bg-gray-900 text-white border border-gray-700"
-              />
+        {/* Group Members Section */}
+        <motion.div 
+          variants={itemVariants}
+          className="mt-12 rounded-3xl bg-gradient-to-br from-gray-900/80 to-black/80 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden"
+        >
+          <div className="p-8">
+            <div className="flex items-center mb-6">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-400 to-blue-500 flex items-center justify-center mr-4">
+                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold">Travel Companions</h2>
+            </div>
+            
+            <div className="space-y-4">
+              {members.map((member, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition duration-300"
+                >
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1">
+                      <label className="text-xs font-medium text-gray-400 mb-1 block">Full Name</label>
+                      <input
+                        type="text"
+                        placeholder="Enter name"
+                        value={member.name}
+                        onChange={(e) => handleMemberChange(index, "name", e.target.value)}
+                        className="w-full p-3 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      />
+                    </div>
+                    <div className="md:w-32">
+                      <label className="text-xs font-medium text-gray-400 mb-1 block">Age</label>
+                      <input
+                        type="number"
+                        placeholder="Age"
+                        value={member.age}
+                        onChange={(e) => handleMemberChange(index, "age", e.target.value)}
+                        className="w-full p-3 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <button
+                        onClick={() => removeMember(index)}
+                        className="w-full md:w-auto p-3 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 hover:text-red-200 border border-red-500/30 transition focus:outline-none"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+              
               <button
-                onClick={() => removeMember(index)}
-                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+                onClick={addMember}
+                className="w-full py-3 rounded-xl bg-blue-600/20 text-blue-300 hover:bg-blue-600/30 hover:text-blue-200 border border-blue-600/30 transition focus:outline-none group flex items-center justify-center"
               >
-                Remove
+                <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Travel Companion
               </button>
             </div>
-          ))}
-          <button
-            onClick={addMember}
-            className="mt-2 bg-blue-600 hover:bg-blue-700 transition px-6 py-2 text-white font-medium rounded-md"
-          >
-            Add Member
-          </button>
-        </div>
+          </div>
+        </motion.div>
 
         {/* Actions */}
-        <div className="mt-10 flex flex-wrap gap-4 justify-center">
+        <motion.div 
+          variants={itemVariants}
+          className="mt-12 flex flex-col sm:flex-row gap-4 justify-center"
+        >
           <button
-            className="py-4 px-6 bg-gradient-to-r from-red-600 to-pink-600 text-white font-bold rounded-full shadow-lg hover:scale-105 transition"
+            className="py-4 px-8 rounded-xl bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 hover:from-red-500/30 hover:to-red-600/30 border border-red-500/30 transition font-medium flex items-center justify-center group"
             onClick={() => {
               setSelectedDestination(null);
               setSelectedAccommodation(null);
@@ -372,23 +322,31 @@ export default function BookingPage() {
               sessionStorage.removeItem("selectedAccommodation");
             }}
           >
+            <svg className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
             Reset Selections
           </button>
+          
           <button
-            className={`py-4 px-6 font-bold rounded-full shadow-lg transition hover:scale-105
-              ${selectedDestination && selectedAccommodation
-                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700"
-                : "bg-gray-500 text-white cursor-not-allowed"}`}
+            className={`py-4 px-8 rounded-xl font-medium flex items-center justify-center transition ${
+              selectedDestination && selectedAccommodation
+                ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-purple-500/25 transform hover:-translate-y-1"
+                : "bg-gray-700/50 text-gray-400 cursor-not-allowed border border-gray-700"
+            }`}
             disabled={!selectedDestination || !selectedAccommodation}
             onClick={() => {
               sessionStorage.setItem("members", JSON.stringify(members));
               navigate("/payment");
             }}
           >
-            Proceed to Payment
+            <span>Proceed to Payment</span>
+            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </button>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
