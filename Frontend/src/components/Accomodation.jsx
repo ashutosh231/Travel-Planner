@@ -12,7 +12,7 @@ export default function Accommodation() {
   };
 
   return (
-    <section id="accommodation" className="py-20 bg-gradient-to-r form-bg-gray-900 via-black to bg-gray-900 text-white ">
+    <section id="accommodation" className="py-20 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
       <div className="container mx-auto px-6">
         <h2 className="text-4xl font-bold text-center mb-12 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
           Accommodation
@@ -46,7 +46,7 @@ export default function Accommodation() {
                 <span className="text-sm text-gray-400">{accommodation.distance}</span>
               </div>
               <button
-                className="mt-4 w-full cursor-pointer bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
+                className="mt-5 w-full cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 hover:shadow-xl"
                 onClick={() => handleBooking(accommodation)}
               >
                 Explore More

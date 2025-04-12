@@ -1,8 +1,8 @@
+
 import { VscChromeClose } from "react-icons/vsc";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Logo from "/Applications/XAMPP/xamppfiles/htdocs/projectX/Frontend/src/assets/Logo.png";
 
 export default function Navbar() {
   const [navbarState, setNavbarState] = useState(false);
@@ -19,7 +19,7 @@ export default function Navbar() {
     const storedName = localStorage.getItem("userName");
 
     setIsLoggedIn(!!token);
-    setProfileImage(storedImage || "");
+    setProfileImage(storedImage || "https://cdn.vectorstock.com/i/1000v/92/16/default-profile-picture-avatar-user-icon-vector-46389216.jpg");
 
     if (storedName) {
       const nameParts = storedName.split(" ");
@@ -68,7 +68,7 @@ export default function Navbar() {
           to="/"
           className="text-2xl font-bold uppercase tracking-wide hover:text-teal-400 transition duration-300"
         >
-          <img src={Logo} alt="Logo" className="w-35 h-15 rounded-lg " />
+          <img src=" " alt="Logo" className="w-35 h-15 rounded-lg " />
         </Link>
 
         {/* Mobile Menu Icon */}
@@ -145,26 +145,14 @@ export default function Navbar() {
 
           {isLoggedIn ? (
             <div className="relative">
-              {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full cursor-pointer border-2 border-white hover:shadow-md transition duration-300"
-                  onClick={() =>
-                    setProfileDropdownOpen(!profileDropdownOpen)
-                  }
-                />
-              ) : (
-                <div
-                  className="w-10 h-10 flex items-center justify-center rounded-full cursor-pointer border-2 border-white bg-gray-500 text-white font-bold text-lg"
-                  onClick={() =>
-                    setProfileDropdownOpen(!profileDropdownOpen)
-                  }
-                >
-                  {userInitials}
-                </div>
-              )}
-
+              <img
+                src={profileImage}
+                alt="Profile"
+                className="w-10 h-10 rounded-full cursor-pointer border-2 border-white hover:shadow-md transition duration-300"
+                onClick={() =>
+                  setProfileDropdownOpen(!profileDropdownOpen)
+                }
+              />
               {/* Profile Dropdown */}
               {profileDropdownOpen && (
                 <ul className="absolute right-0 top-full mt-2 w-48 bg-white bg-opacity-80 backdrop-blur-md text-black rounded-md shadow-lg">
