@@ -38,11 +38,20 @@ export default function Navbar() {
     navigate("/login");
   };
 
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return false;
+    }
+    return true;
+  };
+
   const exploreRoutes = {
-    Destinations: "/recommend",
-    Activities: "/activities",
-    Accommodation: "/accommodation",
-    TravelTips: "/travel-tips",
+    Destinations: () => isAuthenticated() && navigate("/recommend"),
+    Activities: () => isAuthenticated() && navigate("/activities"),
+    Accommodation: () => isAuthenticated() && navigate("/accommodation"),
+    TravelTips: "/travel-tips", // No authentication required
   };
 
   const navLinks = [
@@ -109,13 +118,16 @@ export default function Navbar() {
               <ul className="absolute left-0 top-full mt-2 w-48 bg-white text-black rounded-md shadow-lg overflow-hidden animate-fadeIn z-100">
                 {Object.keys(exploreRoutes).map((item) => (
                   <li key={item}>
-                    <Link
-                      to={exploreRoutes[item]}
+                    <button
+                      onClick={() =>
+                        typeof exploreRoutes[item] === "function"
+                          ? exploreRoutes[item]()
+                          : navigate(exploreRoutes[item])
+                      }
                       className="block px-4 py-2 hover:bg-teal-400 hover:text-white transition duration-300"
-                      onClick={() => setDropdownOpen(false)}
                     >
                       {item}
-                    </Link>
+                    </button>
                   </li>
                 ))}
               </ul>

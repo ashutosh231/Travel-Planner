@@ -22,6 +22,13 @@ export default function BookingPage() {
   const removeMember = (index) => setMembers(members.filter((_, i) => i !== index));
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     // window.TransformStreamDefaultController()
     const storedDates = sessionStorage.getItem("bookingDates");
     if (storedDates) {

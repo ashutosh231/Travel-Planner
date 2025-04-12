@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -310,7 +309,14 @@ export default function DestinationDetails() {
                   whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(219, 39, 119, 0.5)" }}
                   whileTap={{ scale: 0.97 }}
                   className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-4 rounded-xl shadow-lg font-semibold hover:from-pink-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center"
-                  onClick={() => navigate("/booking")}
+                  onClick={() => {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                      navigate("/login");
+                      return;
+                    }
+                    navigate("/booking");
+                  }}
                 >
                   <span>Book Now</span>
                   <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

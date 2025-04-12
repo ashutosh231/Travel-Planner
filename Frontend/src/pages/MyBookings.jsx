@@ -31,6 +31,13 @@ export default function MyBookingsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
     
     // Simulate loading data from storage or API

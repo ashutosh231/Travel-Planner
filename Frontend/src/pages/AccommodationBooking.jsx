@@ -1,8 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { accommodations } from "../data/Accomodation"; // Use relative path
+import { useEffect } from "react";
 
 export default function AccommodationBooking() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleSelectAccommodation = (accommodation) => {
     sessionStorage.setItem("selectedAccommodation", JSON.stringify(accommodation));

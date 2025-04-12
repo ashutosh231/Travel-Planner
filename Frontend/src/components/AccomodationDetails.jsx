@@ -380,6 +380,11 @@ export default function AccommodationDetail() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
+                      const token = localStorage.getItem("token");
+                      if (!token) {
+                        navigate("/login");
+                        return;
+                      }
                       if (checkInDate && checkOutDate) {
                         sessionStorage.setItem("bookingDates", JSON.stringify({
                           checkIn: checkInDate.toISOString(),
