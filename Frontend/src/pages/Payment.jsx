@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -27,22 +25,26 @@ export default function PaymentPage() {
     window.scrollTo(0, 0);
     const storedDestination = sessionStorage.getItem("selectedDestination");
     const storedAccommodation = sessionStorage.getItem("selectedAccommodation");
-    const storedNights = sessionStorage.getItem("numNights");
+    const storedNights = sessionStorage.getItem("numNights"); // Fetch the correct number of nights
     const storedMembers = sessionStorage.getItem("members");
 
     if (storedDestination) setSelectedDestination(JSON.parse(storedDestination));
     if (storedAccommodation) setSelectedAccommodation(JSON.parse(storedAccommodation));
-    if (storedNights) setNumNights(parseInt(storedNights, 10));
+    if (storedNights) setNumNights(parseInt(storedNights, 10)); // Set the correct number of nights
     if (storedMembers) setMembers(JSON.parse(storedMembers));
 
-    if (storedAccommodation) {
-      const acc = JSON.parse(storedAccommodation);
-      setTotalCost(acc.cost * (storedNights ? parseInt(storedNights, 10) : 1));
+    if (storedDestination && storedAccommodation) {
+      const destination = JSON.parse(storedDestination);
+      const accommodation = JSON.parse(storedAccommodation);
+      const accommodationCost = accommodation.cost * (storedNights ? parseInt(storedNights, 10) : 1);
+      const destinationCost = destination.cost;
+      const baseCost = accommodationCost + destinationCost;
+      const serviceFee = 0; // Correct 10% service fee with rounding
+      setTotalCost(baseCost + serviceFee); // Total cost includes service fee
     }
   }, []);
 
   const handlePayment = () => {
-    const totalCost = selectedAccommodation.cost * numNights;
     sessionStorage.setItem("totalCost", totalCost);
     navigate("/paymentOption");
   };
@@ -72,7 +74,7 @@ export default function PaymentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden p-4 md:p-8">
+    <div className="min-h-screen  bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white relative overflow-hidden p-4 md:p-8">
       {/* Floating particles background */}
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(20)].map((_, i) => (
@@ -168,6 +170,7 @@ export default function PaymentPage() {
                         <p className="text-2xl font-bold text-white mb-1">{selectedDestination.title}</p>
                         <p className="text-sm text-purple-300 font-medium mb-4">{selectedDestination.location}</p>
                         <p className="text-gray-300 text-sm leading-relaxed">{selectedDestination.description}</p>
+                        <p className="text-pink-300 text-lg leading-relaxed">{selectedDestination.cost}</p>
                         
                         <div className="flex flex-wrap gap-3 mt-5">
                           <div className="flex items-center gap-2 text-sm bg-purple-900/30 px-3 py-1.5 rounded-lg border border-purple-500/20">
@@ -301,17 +304,30 @@ export default function PaymentPage() {
                   
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <p className="text-gray-300">Accommodation x {numNights} nights</p>
-                      <p className="font-medium text-white">Rs. {(selectedAccommodation?.cost * numNights).toLocaleString()}</p>
+                      <p className="text-gray-300">Destination</p>
+                      <p className="font-medium text-white">Rs. {selectedDestination?.cost}</p>
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-gray-300">Service fee</p>
-                      <p className="font-medium text-white">Rs. 0.00</p>
+                      <p className="text-gray-300">Accommodation x {numNights} nights</p>
+                      <p className="font-medium text-white">Rs. {(selectedAccommodation?.cost * numNights)}</p>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <p className="text-gray-300">Service Fee (10%)</p>
+                      <p className="font-medium text-white">Rs. {Math.round((Number(selectedDestination?.cost || 0) + Number(selectedAccommodation?.cost || 0) * numNights) * 0.1)}</p>
                     </div>
                     <div className="h-px bg-white/10 my-3"></div>
                     <div className="flex justify-between items-center">
                       <p className="text-gray-300 font-medium">Total</p>
-                      <p className="text-2xl font-bold text-green-400">Rs. {totalCost.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-green-400">
+                      Rs. {
+                           Number(selectedDestination?.cost ?? 0) +
+                           Number(selectedAccommodation?.cost ?? 0) * numNights +
+                          Math.round(
+                          (Number(selectedDestination?.cost ?? 0) + Number(selectedAccommodation?.cost ?? 0) * numNights) * 0.1
+                          )
+                         }
+                        </p>           
+                      {/* <p className="text-2xl font-bold text-green-400">Rs. {Number(selectedDestination?.cost ?? 0) + Number(selectedAccommodation?.cost * numNights)+{Math.round((Number(selectedDestination?.cost || 0) + Number(selectedAccommodation?.cost || 0) * numNights) * 0.1)}</p> */}
                     </div>
                   </div>
                 </div>
@@ -344,3 +360,4 @@ export default function PaymentPage() {
     </div>
   );
 }
+

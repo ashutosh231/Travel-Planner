@@ -196,7 +196,7 @@ export default function BookingPage() {
         initial="initial"
         animate="animate"
         variants={pageVariants}
-        className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black text-white"
+        className="min-h-screen bg-gradient-to-br bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white"
       >
         {/* Header Section */}
         <div className="w-full bg-black/30 backdrop-blur-md py-6 border-b border-white/10 shadow-xl mb-8">

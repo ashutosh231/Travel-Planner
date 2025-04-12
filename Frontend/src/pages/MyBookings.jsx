@@ -45,7 +45,7 @@ export default function MyBookingsPage() {
       // Get all booking data from sessionStorage
       const storedDestination = sessionStorage.getItem("selectedDestination");
       const storedAccommodation = sessionStorage.getItem("selectedAccommodation");
-      const storedNights = sessionStorage.getItem("numNights");
+      const storedNights = sessionStorage.getItem("numNights"); // Fetch the correct number of nights
       const storedMembers = sessionStorage.getItem("members");
       const storedTotalCost = sessionStorage.getItem("totalCost");
       const storedCheckInDate = sessionStorage.getItem("checkInDate");
@@ -75,7 +75,7 @@ export default function MyBookingsPage() {
       setBooking({
         destination: storedDestination ? JSON.parse(storedDestination) : null,
         accommodation: storedAccommodation ? JSON.parse(storedAccommodation) : null,
-        numNights: storedNights ? parseInt(storedNights, 10) : 3,
+        numNights: storedNights ? parseInt(storedNights, 10) : 3, // Use the correct number of nights
         totalCost: storedTotalCost ? parseFloat(storedTotalCost) : 0,
         members: storedMembers ? JSON.parse(storedMembers) : [],
         bookingId: generateBookingId(),
@@ -344,7 +344,7 @@ export default function MyBookingsPage() {
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div className="bg-gray-900/50 p-3 rounded-lg border border-white/5">
                             <p className="text-xs text-gray-400 mb-1">Per Night</p>
-                            <p className="text-lg font-bold text-purple-300">Rs. {booking.accommodation.cost.toLocaleString()}</p>
+                            <p className="text-lg font-bold text-purple-300">Rs. {Number(booking.accommodation.cost)}</p>
                           </div>
                           <div className="bg-gray-900/50 p-3 rounded-lg border border-white/5">
                             <p className="text-xs text-gray-400 mb-1">Total Nights</p>
@@ -408,7 +408,7 @@ export default function MyBookingsPage() {
                 <div className="relative z-10">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-bold text-white">Total Payment</h3>
-                    <p className="text-2xl font-bold text-green-400">Rs. {booking.totalCost.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-green-400">Rs. {(Number(booking.destination?.cost ?? 0) + Number(booking.accommodation?.cost ?? 0))}</p>
                   </div>
                   <p className="text-sm text-gray-400 mt-2">Payment completed successfully</p>
                 </div>

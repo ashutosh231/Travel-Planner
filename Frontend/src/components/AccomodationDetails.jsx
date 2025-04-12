@@ -82,6 +82,23 @@ export default function AccommodationDetail() {
     { icon: <FaUsers />, name: "24/7 Support" },
   ];
 
+  const handleBookNow = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    if (checkInDate && checkOutDate) {
+      const numNights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+      sessionStorage.setItem("numNights", numNights); // Store the correct number of nights
+      sessionStorage.setItem("bookingDates", JSON.stringify({
+        checkIn: checkInDate.toISOString(),
+        checkOut: checkOutDate.toISOString()
+      }));
+      navigate("/booking");
+    }
+  };
+
   return (
     <section className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white py-12 px-6 sm:px-10 md:px-16 lg:px-24">
       <AnimatePresence>
@@ -379,20 +396,7 @@ export default function AccommodationDetail() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      const token = localStorage.getItem("token");
-                      if (!token) {
-                        navigate("/login");
-                        return;
-                      }
-                      if (checkInDate && checkOutDate) {
-                        sessionStorage.setItem("bookingDates", JSON.stringify({
-                          checkIn: checkInDate.toISOString(),
-                          checkOut: checkOutDate.toISOString()
-                        }));
-                        navigate("/booking");
-                      }
-                    }}
+                    onClick={handleBookNow}
                     className={`w-full ${
                       checkInDate && checkOutDate
                         ? "bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
