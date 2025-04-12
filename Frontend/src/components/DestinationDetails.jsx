@@ -1,15 +1,17 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Testimonials from "./Testimonials";
-import { FaArrowLeft, FaStar, FaMapMarkerAlt, FaClock, FaMoneyBillWave, FaHeart } from "react-icons/fa";
+import { FaArrowLeft, FaStar, FaMapMarkerAlt, FaClock, FaMoneyBillWave, FaHeart, FaChevronLeft, FaChevronRight, FaShare } from "react-icons/fa";
 import { IoIosPeople } from "react-icons/io";
 import { destinations } from "../data/Recommend";
 
 export default function DestinationDetails() {
   const [destination, setDestination] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,90 +19,219 @@ export default function DestinationDetails() {
     const data = sessionStorage.getItem("selectedDestination");
     if (data) {
       setDestination(JSON.parse(data));
-      // Check if this destination is in favorites (mock implementation)
-      setIsFavorite(Math.random() > 0.5); // Random for demo
+      setIsFavorite(Math.random() > 0.5);
     } else {
-      navigate("/"); // Redirect if no data is found
+      navigate("/");
     }
   }, [navigate]);
 
-  if (!destination) return null;
+  if (!destination) return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <motion.div
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.5, 1, 0.5],
+        }}
+        transition={{
+          duration: 1.5,
+          repeat: Infinity,
+          repeatType: "loop",
+        }}
+        className="text-xl font-semibold"
+      >
+        Loading your dream destination...
+      </motion.div>
+    </div>
+  );
+
+  // Sample images - replace with your actual destination images
+  const images = [
+    destination.image,
+    destination.image1,
+    destination.image2,
+    destination.image3,
+    // destination.image4,
+   
+  ];
+
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) => 
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
-    // Here you would typically update your state/API
   };
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white py-12 px-4 sm:px-8 md:px-12 lg:px-20">
+    <section className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white py-12 px-6 sm:px-10 md:px-16 lg:px-24">
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
           className="max-w-7xl mx-auto"
         >
-          {/* Back Button */}
-          <motion.button
-            whileHover={{ x: -4 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(-1)}
-            className="flex items-center mb-8 text-sm px-5 py-2.5 bg-gradient-to-r from-purple-600/30 to-pink-600/30 hover:from-purple-700/40 hover:to-pink-700/40 rounded-full shadow-lg backdrop-blur-sm border border-purple-500/20 transition-all duration-300 group"
-          >
-            <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" />
-            Back to Destinations
-          </motion.button>
-
-          {/* Main Content */}
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Image Gallery */}
-            <div className="relative w-full h-[400px] sm:h-[500px] overflow-hidden rounded-2xl shadow-2xl">
-              <motion.img
-                src={destination.image}
-                alt={destination.title}
-                className={`w-full h-full object-cover ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: imageLoaded ? 1 : 0, scale: 1 }}
-                transition={{ duration: 0.8 }}
-                onLoad={() => setImageLoaded(true)}
-              />
-              
-              {/* Loading Skeleton */}
-              {!imageLoaded && (
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-pink-900/20 animate-pulse"></div>
-              )}
-              
-              {/* Favorite Button */}
+          {/* Header with Back Button and Actions */}
+          <div className="flex justify-between items-center mb-8">
+            <motion.button
+              whileHover={{ x: -4 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate(-1)}
+              className="flex items-center text-sm px-5 py-2.5 bg-gradient-to-r from-purple-600/50 to-pink-600/50 hover:from-purple-700/60 hover:to-pink-700/60 rounded-full shadow-lg backdrop-blur-sm border border-pink-500/20 transition-all duration-300 group"
+            >
+              <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" />
+              Back to Destinations
+            </motion.button>
+            
+            <div className="flex gap-3">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={toggleFavorite}
-                className="absolute top-4 right-4 p-3 bg-black/50 backdrop-blur-sm rounded-full shadow-lg"
-                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                className="p-3 rounded-full bg-black/30 backdrop-blur-md border border-white/10 hover:bg-black/40 transition-all"
               >
-                <FaHeart 
-                  className={`text-xl ${isFavorite ? 'text-pink-500 fill-current' : 'text-white/70'}`}
-                />
+                <FaHeart className={isFavorite ? "text-pink-500" : "text-gray-400"} />
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowShareModal(!showShareModal)}
+                className="p-3 rounded-full bg-black/30 backdrop-blur-md border border-white/10 hover:bg-black/40 transition-all"
+              >
+                <FaShare className="text-gray-400" />
               </motion.button>
             </div>
+          </div>
+
+          {/* Title Section */}
+          <div className="mb-8">
+            <motion.h1 
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-blue-500"
+            >
+              {destination.title}
+            </motion.h1>
+            <motion.div
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center gap-2 mb-2"
+            >
+              <FaMapMarkerAlt className="text-pink-400" />
+              <p className="text-gray-300">{destination.subTitle}</p>
+            </motion.div>
+            <motion.div
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="flex items-center gap-2"
+            >
+              <div className="flex">
+                {[...Array(Math.floor(destination.rating))].map((_, i) => (
+                  <FaStar key={i} className="text-yellow-400" />
+                ))}
+                {destination.rating % 1 !== 0 && (
+                  <FaStar className="text-yellow-400 opacity-50" />
+                )}
+              </div>
+              <span className="text-gray-300">
+                {destination.rating} ({destination.reviews} reviews)
+              </span>
+            </motion.div>
+          </div>
+
+          {/* Main Content */}
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            {/* Enhanced Image Gallery */}
+            <motion.div
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="w-full"
+            >
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl mb-4 aspect-w-16 aspect-h-9">
+                <motion.img
+                  key={currentImageIndex}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                  src={images[currentImageIndex]}
+                  alt={`${destination.title} view ${currentImageIndex + 1}`}
+                  className="w-full h-[500px] object-cover"
+                />
+                
+                {/* Gallery navigation arrows */}
+                <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 flex justify-between px-4">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={prevImage}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm"
+                  >
+                    <FaChevronLeft className="text-white" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={nextImage}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm"
+                  >
+                    <FaChevronRight className="text-white" />
+                  </motion.button>
+                </div>
+                
+                {/* Image counter */}
+                <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                  {currentImageIndex + 1} / {images.length}
+                </div>
+              </div>
+              
+              {/* Thumbnail strip */}
+              <div className="flex space-x-2 overflow-x-auto pb-2">
+                {images.map((img, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`cursor-pointer rounded-lg overflow-hidden h-20 w-32 flex-shrink-0 border-2 ${
+                      currentImageIndex === index ? "border-pink-500" : "border-transparent"
+                    }`}
+                    onClick={() => goToImage(index)}
+                  >
+                    <img 
+                      src={img} 
+                      alt={`Thumbnail ${index + 1}`} 
+                      className="h-full w-full object-cover" 
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
 
             {/* Destination Info */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
               className="space-y-6"
             >
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                  {destination.title}
-                </h1>
-                <p className="mt-3 text-lg text-gray-300 leading-relaxed">
-                  {destination.subTitle}
-                </p>
-              </div>
-
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <motion.div 
@@ -154,7 +285,9 @@ export default function DestinationDetails() {
 
               {/* Highlights */}
               <div className="pt-4">
-                <h3 className="text-xl font-semibold mb-3 text-pink-400">Trip Highlights</h3>
+                <h3 className="text-xl font-semibold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+                  Trip Highlights
+                </h3>
                 <ul className="space-y-2">
                   {destination.tripHighlights && destination.tripHighlights.map((highlight, index) => (
                     <motion.li 
@@ -198,9 +331,61 @@ export default function DestinationDetails() {
           </div>
 
           {/* Additional Sections */}
-          <div className="mt-24">
+          <div className="mt-24 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
             <Testimonials />
           </div>
+
+          {/* Share Modal */}
+          <AnimatePresence>
+            {showShareModal && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm"
+                onClick={() => setShowShareModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  className="bg-gray-900 p-8 rounded-2xl border border-white/10 max-w-md w-full"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="text-2xl font-bold mb-4">Share This Destination</h3>
+                  <div className="grid grid-cols-4 gap-4 mb-6">
+                    {['Facebook', 'Twitter', 'WhatsApp', 'Email'].map((platform) => (
+                      <motion.button
+                        key={platform}
+                        whileHover={{ y: -3 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex flex-col items-center justify-center bg-black/30 p-4 rounded-xl"
+                      >
+                        <div className="text-pink-400 mb-1">
+                          {platform === 'Facebook' && '𝕗'}
+                          {platform === 'Twitter' && '𝕏'}
+                          {platform === 'WhatsApp' && '𝕎'}
+                          {platform === 'Email' && '✉'}
+                        </div>
+                        <span className="text-xs">{platform}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                  <div className="flex">
+                    <input
+                      type="text"
+                      value={`https://wanderlust.com/destination/${destination.title.toLowerCase().replace(/\s+/g, '-')}`}
+                      readOnly
+                      className="flex-1 bg-black/30 p-3 rounded-l-lg text-sm"
+                    />
+                    <button className="bg-pink-500 hover:bg-pink-600 px-4 rounded-r-lg">
+                      Copy
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </AnimatePresence>
     </section>

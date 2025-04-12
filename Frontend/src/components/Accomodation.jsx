@@ -8,7 +8,7 @@ export default function Accommodation() {
   const handleBooking = (accommodation) => {
     console.log("Storing in session:", accommodation); // Debugging log
     sessionStorage.setItem("selectedAccommodation", JSON.stringify(accommodation));
-    navigate("/booking");
+    navigate("/accomodation-details");
   };
 
   return (
@@ -49,7 +49,7 @@ export default function Accommodation() {
                 className="mt-4 w-full cursor-pointer bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
                 onClick={() => handleBooking(accommodation)}
               >
-                Book Now
+                Explore More
               </button>
             </div>
           ))}

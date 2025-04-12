@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
@@ -79,13 +79,11 @@ const Signup = () => {
       return;
     }
 
-    const { confirmPassword, ...formData } = form;
-
     try {
-      const response = await fetch("http://localhost/Travel-Planner/backend/signup.php", {
+      const response = await fetch("http://localhost/projectX/backend/signup.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(form),
       });
 
       const result = await response.json();

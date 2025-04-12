@@ -39,7 +39,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost/Travel-Planner/backend/get_user_data.php");
+        const response = await fetch("http://localhost/projectX/backend/get_user_data.php");
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
         }

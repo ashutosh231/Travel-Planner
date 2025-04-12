@@ -20,7 +20,6 @@ if ($conn->connect_error) {
 
 // Read JSON input
 $data = json_decode(file_get_contents("php://input"), true);
-
 // Validate input
 if (!$data || empty($data["name"]) || empty($data["email"]) || empty($data["password"]) || empty($data["phone"]) || empty($data["location"]) || empty($data["bio"]) || empty($data["gender"]) || empty($data["dob"])) {
     echo json_encode(["success" => false, "message" => "Invalid input"]);
