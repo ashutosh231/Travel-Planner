@@ -28,6 +28,7 @@
     "@react-three/drei": "^10.0.6",
     "@react-three/fiber": "^9.1.2",
     "@tailwindcss/vite": "^4.0.5",
+    "axios": "^1.8.4",
     "framer-motion": "^12.6.3",
     "lucide-react": "^0.487.0",
     "parallax": "^0.0.0",

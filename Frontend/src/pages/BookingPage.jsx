@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { motion } from "framer-motion";
+import activitiesData from "../data/Activities"; // Import activities data
 
 export default function BookingPage() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function BookingPage() {
   const [bookingDates, setBookingDates] = useState(null);
   const [numNights, setNumNights] = useState(1);
   const [members, setMembers] = useState([{ name: "", age: "" }]);
+  const [selectedActivities, setSelectedActivities] = useState([]); // Add state for selected activities
 
   const handleMemberChange = (index, field, value) => {
     const updatedMembers = [...members];
@@ -21,6 +23,18 @@ export default function BookingPage() {
   const addMember = () => setMembers([...members, { name: "", age: "" }]);
   const removeMember = (index) => setMembers(members.filter((_, i) => i !== index));
 
+  // Function to toggle activity selection
+  const toggleActivity = (activity) => {
+    if (selectedActivities.some(a => a.id === activity.id)) {
+      setSelectedActivities(selectedActivities.filter(a => a.id !== activity.id));
+    } else {
+      setSelectedActivities([...selectedActivities, activity]);
+    }
+  };
+
+  // Calculate total activities cost
+  const activitiesTotalCost = selectedActivities.reduce((sum, activity) => sum + activity.price, 0);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -29,7 +43,6 @@ export default function BookingPage() {
   }, [navigate]);
 
   useEffect(() => {
-    // window.TransformStreamDefaultController()
     const storedDates = sessionStorage.getItem("bookingDates");
     if (storedDates) {
       const dates = JSON.parse(storedDates);
@@ -196,7 +209,7 @@ export default function BookingPage() {
         initial="initial"
         animate="animate"
         variants={pageVariants}
-        className="min-h-screen bg-gradient-to-br bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white"
+        className="min-h-screen  bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white"
       >
         {/* Header Section */}
         <div className="w-full bg-black/30 backdrop-blur-md py-6 border-b border-white/10 shadow-xl mb-8">
@@ -309,6 +322,89 @@ export default function BookingPage() {
             </motion.div>
           </div>
 
+          {/* Optional Activities Section */}
+          <motion.div 
+            variants={itemVariants}
+            className="mt-12 rounded-3xl bg-gradient-to-br from-indigo-900/80 to-purple-900/80 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden"
+          >
+            <div className="p-8">
+              <div className="flex items-center mb-6">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center mr-4">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Optional Activities</h2>
+                  <p className="text-gray-300 text-sm">Enhance your travel experience with these activities</p>
+                </div>
+                
+                <div className="ml-auto text-right">
+                  <div className="text-gray-300">Total Added:</div>
+                  <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-blue-400">
+                    Rs. {activitiesTotalCost}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activitiesData.slice(0, 6).map((activity) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                      selectedActivities.some(a => a.id === activity.id) 
+                        ? "bg-purple-600/30 border-purple-500" 
+                        : "bg-white/5 border-white/10 hover:bg-white/10"
+                    }`}
+                    onClick={() => toggleActivity(activity)}
+                  >
+                    <div className="flex gap-3">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                        <img src={activity.imageUrl} alt={activity.title} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-white">{activity.title}</h4>
+                        <div className="flex items-center gap-1 text-xs text-gray-400 mb-2">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
+                          </svg>
+                          {activity.location}
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-indigo-300 font-semibold">Rs. {activity.price}</span>
+                          <span className="text-xs text-gray-400">{activity.duration}</span>
+                        </div>
+                      </div>
+                    </div>
+                    {selectedActivities.some(a => a.id === activity.id) && (
+                      <div className="mt-2 text-xs flex justify-end text-purple-300">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+                        </svg>
+                        Selected
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+              
+              <div className="mt-6 flex justify-center">
+                <button 
+                  className="px-5 py-2 rounded-lg bg-white/5 text-white/70 hover:bg-white/10 border border-white/10 transition flex items-center"
+                  onClick={() => navigate("/activities")}
+                >
+                  View All Activities
+                  <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Group Members Section */}
           <motion.div 
             variants={itemVariants}
@@ -392,10 +488,11 @@ export default function BookingPage() {
                 setSelectedDestination(null);
                 setSelectedAccommodation(null);
                 setBookingDates(null);
+                setSelectedActivities([]);
                 sessionStorage.removeItem("selectedDestination");
                 sessionStorage.removeItem("selectedAccommodation");
                 sessionStorage.removeItem("bookingDates");
-                // navigate("/recommend");
+                sessionStorage.removeItem("selectedActivities");
               }}
             >
               <svg className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -413,6 +510,7 @@ export default function BookingPage() {
               disabled={!selectedDestination || !selectedAccommodation || !bookingDates}
               onClick={() => {
                 sessionStorage.setItem("members", JSON.stringify(members));
+                sessionStorage.setItem("selectedActivities", JSON.stringify(selectedActivities));
                 navigate("/payment");
               }}
             >

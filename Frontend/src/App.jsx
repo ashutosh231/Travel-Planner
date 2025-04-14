@@ -23,6 +23,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import MyBookings from "./pages/MyBookings";
 import DestinationDetails from "./components/DestinationDetails";
 import AccommodationDetails from "./components/AccomodationDetails" // ✅ Correct
+import MeetOurTeam from "./components/MeetOurTeam"; // New import
  // Fixed import
 import { createContext, useState } from "react";
 
@@ -69,6 +70,7 @@ function App() {
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/destination-details" element={<DestinationDetails />} />
           <Route path="/accomodation-details" element={<AccommodationDetails />} />
+          <Route path="/meet-our-team" element={<MeetOurTeam />} /> {/* New route */}
           {/* 404 Page */}
         </Routes>
         <Footer />

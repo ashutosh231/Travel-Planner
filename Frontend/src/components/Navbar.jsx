@@ -61,6 +61,7 @@ export default function Navbar() {
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
     { name: "Accommodation", path: "/accommodation" },
+    { name: "Meet Our Team", path: "/meet-our-team" },
     { name: "My Bookings", path: "/my-bookings" },
   ];
 

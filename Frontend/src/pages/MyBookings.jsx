@@ -10,7 +10,8 @@ import {
   FaCreditCard,
   FaDownload,
   FaShareAlt,
-  FaCheckCircle
+  FaCheckCircle,
+  FaUmbrellaBeach
 } from 'react-icons/fa';
 import { motion } from "framer-motion";
 
@@ -22,6 +23,7 @@ export default function MyBookingsPage() {
     numNights: 0,
     totalCost: 0,
     members: [],
+    selectedActivities: [],
     bookingId: "",
     bookingDate: "",
     paymentMethod: "",
@@ -45,12 +47,13 @@ export default function MyBookingsPage() {
       // Get all booking data from sessionStorage
       const storedDestination = sessionStorage.getItem("selectedDestination");
       const storedAccommodation = sessionStorage.getItem("selectedAccommodation");
-      const storedNights = sessionStorage.getItem("numNights"); // Fetch the correct number of nights
+      const storedNights = sessionStorage.getItem("numNights");
       const storedMembers = sessionStorage.getItem("members");
       const storedTotalCost = sessionStorage.getItem("totalCost");
       const storedCheckInDate = sessionStorage.getItem("checkInDate");
       const storedCheckOutDate = sessionStorage.getItem("checkOutDate");
       const paymentMethod = sessionStorage.getItem("paymentMethod") || "Credit Card";
+      const storedActivities = sessionStorage.getItem("selectedActivities");
       
       // Generate a random booking ID
       const generateBookingId = () => {
@@ -75,9 +78,10 @@ export default function MyBookingsPage() {
       setBooking({
         destination: storedDestination ? JSON.parse(storedDestination) : null,
         accommodation: storedAccommodation ? JSON.parse(storedAccommodation) : null,
-        numNights: storedNights ? parseInt(storedNights, 10) : 3, // Use the correct number of nights
+        numNights: storedNights ? parseInt(storedNights, 10) : 3,
         totalCost: storedTotalCost ? parseFloat(storedTotalCost) : 0,
         members: storedMembers ? JSON.parse(storedMembers) : [],
+        selectedActivities: storedActivities ? JSON.parse(storedActivities) : [],
         bookingId: generateBookingId(),
         bookingDate: formatDate(new Date()),
         paymentMethod,
@@ -123,6 +127,7 @@ export default function MyBookingsPage() {
     sessionStorage.removeItem("checkInDate");
     sessionStorage.removeItem("checkOutDate");
     sessionStorage.removeItem("paymentMethod");
+    sessionStorage.removeItem("selectedActivities");
     
     // Navigate to home or recommendation page
     navigate("/recommend");
@@ -138,6 +143,10 @@ export default function MyBookingsPage() {
       </div>
     );
   }
+
+  // Calculate activities total cost
+  const activitiesTotalCost = booking.selectedActivities.reduce((sum, activity) => 
+    sum + parseFloat(activity.price || 0), 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden p-4 md:p-8">
@@ -365,6 +374,58 @@ export default function MyBookingsPage() {
                 </motion.div>
               )}
 
+              {/* Activities Section */}
+              {booking.selectedActivities && booking.selectedActivities.length > 0 && (
+                <motion.div
+                  variants={itemVariants}
+                  className="p-6 bg-gray-800/40 rounded-xl border border-white/10 relative overflow-hidden mb-6"
+                >
+                  <div className="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full filter blur-2xl"></div>
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between mb-4">
+                      <h3 className="text-xl font-bold flex items-center gap-3 text-indigo-200">
+                        <div className="p-2 bg-indigo-900/50 rounded-lg border border-indigo-500/30">
+                          <FaUmbrellaBeach className="text-indigo-300" />
+                        </div>
+                        <span>Selected Activities</span>
+                      </h3>
+                      <div className="px-3 py-1 bg-indigo-900/30 rounded-lg border border-indigo-500/30">
+                        <span className="text-indigo-200 font-medium">
+                          Rs. {activitiesTotalCost}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-3 mt-2">
+                      {booking.selectedActivities.map((activity, index) => (
+                        <div key={index} className="bg-gray-900/40 rounded-lg p-4 border border-white/10">
+                          <div className="flex gap-3">
+                            <img 
+                              src={activity.imageUrl} 
+                              alt={activity.title}
+                              className="w-16 h-16 object-cover rounded-lg flex-shrink-0" 
+                            />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-white">{activity.title}</h4>
+                              <div className="flex items-center justify-between mt-1">
+                                <div className="flex items-center gap-1 text-xs text-gray-400">
+                                  <FaMapMarkerAlt className="text-indigo-400" />
+                                  <span>{activity.location}</span>
+                                </div>
+                                <span className="text-sm font-medium text-indigo-300">Rs. {activity.price}</span>
+                              </div>
+                              <div className="text-xs text-gray-400 mt-1">
+                                Duration: {activity.duration}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Group Members Section */}
               {booking.members.length > 0 && (
                 <motion.div
@@ -408,9 +469,26 @@ export default function MyBookingsPage() {
                 <div className="relative z-10">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-bold text-white">Total Payment</h3>
-                    <p className="text-2xl font-bold text-green-400">Rs. {(Number(booking.destination?.cost ?? 0) + Number(booking.accommodation?.cost ?? 0))}</p>
+                    <p className="text-2xl font-bold text-green-400">Rs. {booking.totalCost}</p>
                   </div>
-                  <p className="text-sm text-gray-400 mt-2">Payment completed successfully</p>
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                    <div className="text-gray-400">Destination:</div>
+                    <div className="text-right text-white">Rs. {Number(booking.destination?.cost ?? 0)}</div>
+                    
+                    <div className="text-gray-400">Accommodation ({booking.numNights} nights):</div>
+                    <div className="text-right text-white">Rs. {Number(booking.accommodation?.cost ?? 0) * booking.numNights}</div>
+                    
+                    {activitiesTotalCost > 0 && (
+                      <>
+                        <div className="text-gray-400">Activities:</div>
+                        <div className="text-right text-white">Rs. {activitiesTotalCost}</div>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-400 mt-3 flex items-center gap-2">
+                    <FaCheckCircle className="text-green-400" />
+                    Payment completed successfully
+                  </p>
                 </div>
               </motion.div>
             </div>
