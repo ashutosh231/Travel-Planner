@@ -24,49 +24,56 @@ import MyBookings from "./pages/MyBookings";
 import DestinationDetails from "./components/DestinationDetails";
 import AccommodationDetails from "./components/AccomodationDetails" // ✅ Correct
  // Fixed import
+import { createContext, useState } from "react";
+
+export const UserContext = createContext();
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+
   return (
-    <div className="font-sans scroll-smooth bg-black">
-      <ScrollToTop />
-      <Navbar />
-      <Routes>
-        {/* Home Page */}
-        <Route
-          path="/"
-          element={
-            <>
-              <Hero />
-              <Services />
-              <Recommend />
-              <Testimonials />
-              <About />
-            </>
-          }
-        />
-        {/* Individual Pages */}
-        <Route path="/about" element={<About />} />
-        <Route path="/recommend" element={<Recommend />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/activities" element={<Activities />} />
-        <Route path="/accommodation" element={<Accommodation />} />
-        <Route path="/travel-tips" element={<TravelTips />} />
-        <Route path="/booking" element={<BookingPage />} />
-        <Route path="/select-destination" element={<DestinationBooking />} />
-        <Route path="/select-accommodation" element={<AccommodationBooking />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/paymentOption" element={<PaymentOption />} />
-        <Route path="/success" element={<Success />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/my-bookings" element={<MyBookings />} />
-        <Route path="/destination-details" element={<DestinationDetails />} />
-        <Route path="/accomodation-details" element={<AccommodationDetails />} />
-        {/* 404 Page */}
-      </Routes>
-      <Footer />
-    </div>
+    <UserContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+      <div className="font-sans scroll-smooth bg-black">
+        <ScrollToTop />
+        <Navbar />
+        <Routes>
+          {/* Home Page */}
+          <Route
+            path="/"
+            element={
+              <>
+                <Hero />
+                <Services />
+                <Recommend />
+                <Testimonials />
+                <About />
+              </>
+            }
+          />
+          {/* Individual Pages */}
+          <Route path="/about" element={<About />} />
+          <Route path="/recommend" element={<Recommend />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/activities" element={<Activities />} />
+          <Route path="/accommodation" element={<Accommodation />} />
+          <Route path="/travel-tips" element={<TravelTips />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/select-destination" element={<DestinationBooking />} />
+          <Route path="/select-accommodation" element={<AccommodationBooking />} />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="/paymentOption" element={<PaymentOption />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/destination-details" element={<DestinationDetails />} />
+          <Route path="/accomodation-details" element={<AccommodationDetails />} />
+          {/* 404 Page */}
+        </Routes>
+        <Footer />
+      </div>
+    </UserContext.Provider>
   );
 }
 

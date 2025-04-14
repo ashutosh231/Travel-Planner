@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../App";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useContext(UserContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +34,7 @@ const Login = () => {
       }
       
       localStorage.setItem("token", data.token);
+      setIsLoggedIn(true); // Notify context about login
       navigate("/");
       
     } catch (error) {

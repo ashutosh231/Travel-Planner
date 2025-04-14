@@ -1,14 +1,15 @@
-
 import { VscChromeClose } from "react-icons/vsc";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Logo from "/Users/aryanraj/Desktop/htdocs/projectX/Frontend/src/assets/Logo.png";
+import { UserContext } from "../App";
 
 export default function Navbar() {
+  const { isLoggedIn, setIsLoggedIn } = useContext(UserContext);
   const [navbarState, setNavbarState] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profileImage, setProfileImage] = useState("");
   const [userInitials, setUserInitials] = useState("");
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ export default function Navbar() {
           to="/"
           className="text-2xl font-bold uppercase tracking-wide hover:text-teal-400 transition duration-300"
         >
-          <img src=" " alt="Logo" className="w-35 h-15 rounded-lg " />
+          <img src={Logo} alt="Logo" className="w-35 h-15 rounded-lg " />
         </Link>
 
         {/* Mobile Menu Icon */}

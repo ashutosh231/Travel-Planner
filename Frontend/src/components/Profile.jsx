@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../App";
 
 const Profile = () => {
+  const { isLoggedIn } = useContext(UserContext);
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
     name: "",
@@ -68,6 +70,12 @@ const Profile = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [locationRef]);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
