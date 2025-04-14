@@ -19,7 +19,7 @@ const Login = () => {
   const handleLogin = async () => {
     setErrorMessage(""); // Clear previous errors
     try {
-      const response = await fetch("http://localhost/projectX/backend/login.php", {
+      const response = await fetch("http://localhost/Travel-Planner/backend/login.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

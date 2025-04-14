@@ -1,8 +1,10 @@
 import { VscChromeClose } from "react-icons/vsc";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { FaMapMarkerAlt, FaUsers, FaHotel, FaLightbulb, FaCompass } from "react-icons/fa";
+import { motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Logo from "/Users/aryanraj/Desktop/htdocs/projectX/Frontend/src/assets/Logo.png";
+import Logo from "../assets/Logo.png";
 import { UserContext } from "../App";
 
 export default function Navbar() {
@@ -116,22 +118,63 @@ export default function Navbar() {
               </svg>
             </button>
             {dropdownOpen && (
-              <ul className="absolute left-0 top-full mt-2 w-48 bg-white text-black rounded-md shadow-lg overflow-hidden animate-fadeIn z-100">
-                {Object.keys(exploreRoutes).map((item) => (
-                  <li key={item}>
-                    <button
-                      onClick={() =>
-                        typeof exploreRoutes[item] === "function"
-                          ? exploreRoutes[item]()
-                          : navigate(exploreRoutes[item])
-                      }
-                      className="block px-4 py-2 hover:bg-teal-400 hover:text-white transition duration-300"
+              <motion.ul 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute left-0 top-full mt-2 w-40 bg-white/5 backdrop-blur-xl border border-white/20 text-white rounded-xl shadow-xl overflow-hidden z-100"
+              >
+                {/* Enhanced glassmorphism background layers */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-teal-600/10 rounded-xl"></div>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-teal-600/20 rounded-xl blur-md opacity-60"></div>
+                <div className="absolute inset-0 bg-black/20 rounded-xl"></div>
+                
+                {/* Glowing edge effect */}
+                <div className="absolute inset-0 border border-white/30 rounded-xl opacity-20 
+                     [box-shadow:0_0_15px_rgba(255,255,255,0.3),inset_0_0_15px_rgba(255,255,255,0.1)] animate-pulse"></div>
+                
+                <div className="relative z-10">
+                  {Object.keys(exploreRoutes).map((item, index) => (
+                    <motion.li 
+                      key={item}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="relative"
                     >
-                      {item}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+                      <button
+                        onClick={() =>
+                          typeof exploreRoutes[item] === "function"
+                            ? exploreRoutes[item]()
+                            : navigate(exploreRoutes[item])
+                        }
+                        className="relative z-10 w-full flex items-center space-x-2 px-3 py-2 hover:bg-white/10 transition-all duration-300 group"
+                      >
+                        <span className="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 to-teal-500/20 
+                              group-hover:from-purple-500/40 group-hover:to-teal-500/40 transition-all duration-300
+                              shadow-[0_0_10px_rgba(139,92,246,0.3)] group-hover:shadow-[0_0_15px_rgba(139,92,246,0.5)]">
+                          {item === "Destinations" && <FaMapMarkerAlt className="text-purple-300 group-hover:text-purple-100 text-sm" />}
+                          {item === "Activities" && <FaUsers className="text-blue-300 group-hover:text-blue-100 text-sm" />}
+                          {item === "Accommodation" && <FaHotel className="text-teal-300 group-hover:text-teal-100 text-sm" />}
+                          {item === "TravelTips" && <FaLightbulb className="text-amber-300 group-hover:text-amber-100 text-sm" />}
+                        </span>
+                        <span className="text-white/90 group-hover:text-white font-medium text-sm">{item}</span>
+                        
+                        {/* Hover indicator line */}
+                        <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-gradient-to-r from-transparent via-purple-400 to-transparent 
+                               group-hover:w-full transition-all duration-500"></span>
+                      </button>
+                    </motion.li>
+                  ))}
+                  
+                  <div className="px-3 py-1.5 border-t border-white/20 bg-white/5">
+                    <div className="text-xs text-white/60 flex items-center gap-1">
+                      <FaCompass className="text-teal-400 animate-pulse text-xs" />
+                      <span className="truncate">Explore destinations</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.ul>
             )}
           </li>
         </ul>
@@ -156,34 +199,106 @@ export default function Navbar() {
               />
               {/* Profile Dropdown */}
               {profileDropdownOpen && (
-                <ul className="absolute right-0 top-full mt-2 w-48 bg-white bg-opacity-80 backdrop-blur-md text-black rounded-md shadow-lg">
-                  <li>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 hover:bg-purple-400 hover:text-white transition duration-300"
-                      onClick={() => setProfileDropdownOpen(false)}
+                <motion.ul 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute right-0 top-full mt-2 w-40 bg-white/5 backdrop-blur-xl border border-white/20 text-white rounded-xl shadow-xl overflow-hidden z-100"
+                >
+                  {/* Enhanced glassmorphism background layers */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-pink-600/10 rounded-xl"></div>
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl blur-md opacity-60"></div>
+                  <div className="absolute inset-0 bg-black/20 rounded-xl"></div>
+                  
+                  {/* Glowing edge effect */}
+                  <div className="absolute inset-0 border border-white/30 rounded-xl opacity-20 
+                       [box-shadow:0_0_15px_rgba(255,255,255,0.3),inset_0_0_15px_rgba(255,255,255,0.1)] animate-pulse"></div>
+                  
+                  <div className="relative z-10">
+                    <motion.li 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 }}
+                      className="relative"
                     >
-                      My Profile
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/my-bookings"
-                      className="block px-4 py-2 hover:bg-purple-400 hover:text-white transition duration-300"
-                      onClick={() => setProfileDropdownOpen(false)}
+                      <Link
+                        to="/profile"
+                        className="relative z-10 w-full flex items-center space-x-2 px-3 py-2 hover:bg-white/10 transition-all duration-300 group"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        <span className="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 
+                              group-hover:from-purple-500/40 group-hover:to-pink-500/40 transition-all duration-300
+                              shadow-[0_0_10px_rgba(139,92,246,0.3)] group-hover:shadow-[0_0_15px_rgba(139,92,246,0.5)]">
+                          <svg className="w-4 h-4 text-purple-300 group-hover:text-purple-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </span>
+                        <span className="text-white/90 group-hover:text-white font-medium text-sm">My Profile</span>
+                        
+                        {/* Hover indicator line */}
+                        <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-gradient-to-r from-transparent via-purple-400 to-transparent 
+                               group-hover:w-full transition-all duration-500"></span>
+                      </Link>
+                    </motion.li>
+                    
+                    <motion.li 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="relative"
                     >
-                      My Bookings
-                    </Link>
-                  </li>
-                  <li>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 bg-red-500 text-white hover:bg-red-600 transition duration-300"
+                      <Link
+                        to="/my-bookings"
+                        className="relative z-10 w-full flex items-center space-x-2 px-3 py-2 hover:bg-white/10 transition-all duration-300 group"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        <span className="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500/20 to-teal-500/20 
+                              group-hover:from-blue-500/40 group-hover:to-teal-500/40 transition-all duration-300
+                              shadow-[0_0_10px_rgba(59,130,246,0.3)] group-hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                          <svg className="w-4 h-4 text-blue-300 group-hover:text-blue-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </span>
+                        <span className="text-white/90 group-hover:text-white font-medium text-sm">My Bookings</span>
+                        
+                        {/* Hover indicator line */}
+                        <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-gradient-to-r from-transparent via-blue-400 to-transparent 
+                               group-hover:w-full transition-all duration-500"></span>
+                      </Link>
+                    </motion.li>
+                    
+                    <motion.li 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.15 }}
+                      className="relative"
                     >
-                      Logout
-                    </button>
-                  </li>
-                </ul>
+                      <button
+                        onClick={handleLogout}
+                        className="relative z-10 w-full flex items-center space-x-2 px-3 py-2 hover:bg-red-500/30 transition-all duration-300 group"
+                      >
+                        <span className="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-red-500/20 to-orange-500/20 
+                              group-hover:from-red-500/40 group-hover:to-orange-500/40 transition-all duration-300
+                              shadow-[0_0_10px_rgba(239,68,68,0.3)] group-hover:shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                          <svg className="w-4 h-4 text-red-300 group-hover:text-red-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
+                        </span>
+                        <span className="text-white/90 group-hover:text-white font-medium text-sm">Logout</span>
+                        
+                        {/* Hover indicator line */}
+                        <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-gradient-to-r from-transparent via-red-400 to-transparent 
+                              group-hover:w-full transition-all duration-500"></span>
+                      </button>
+                    </motion.li>
+                    
+                    <div className="px-3 py-1.5 border-t border-white/20 bg-white/5">
+                      <div className="text-xs text-white/60 flex items-center justify-center">
+                        <span className="truncate text-center">{userInitials || "User"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.ul>
               )}
             </div>
           ) : (

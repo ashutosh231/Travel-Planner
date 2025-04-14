@@ -80,7 +80,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await fetch("http://localhost/projectX/backend/signup.php", {
+      const response = await fetch("http://localhost/Travel-Planner/backend/signup.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -112,13 +112,16 @@ const Signup = () => {
 
       <div className={`w-full h-full flex flex-col items-center justify-center p-6 transition-opacity duration-1000 ${isPageLoaded ? 'opacity-100' : 'opacity-0'}`}>
         <div className="w-full max-w-6xl relative">
-          {/* Back button */}
+          {/* Back button - Without background */}
           <button 
-            onClick={() => navigate('/')} 
-            className="absolute left-4 top-4 text-white/70 hover:text-white flex items-center gap-2 transition-all duration-300 group"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/');
+            }} 
+            className="absolute left-4 top-4 z-50 text-white/80 hover:text-white flex items-center gap-2 transition-all duration-300 group"
           >
             <span className="text-2xl transition-transform duration-300 group-hover:-translate-x-1">←</span>
-            <span className="font-medium">Back</span>
+            <span className="font-medium">Back to Home</span>
           </button>
 
           {/* Header */}

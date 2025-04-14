@@ -64,7 +64,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      const response = await fetch("http://localhost/Travel-Planner/backend/verify_otp.php", {
+      const response = await fetch("http://localhost/img/Travel-Planner/backend/verify_otp.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
