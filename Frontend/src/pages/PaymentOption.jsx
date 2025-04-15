@@ -1,25 +1,49 @@
+import axios from "axios"; // Import axios for API calls
 import { useNavigate } from "react-router-dom";
 import { FaCreditCard, FaGooglePay, FaApplePay, FaQrcode, FaUniversity } from "react-icons/fa";
-// import qrCode from "../assets/qr-code.png"; // Ensure you have a QR code image in the assets folder
 
 export default function FakePaymentPage() {
   const navigate = useNavigate();
 
-  const handlePayment = () => {
-    const bookingDetails = {
-      destination: sessionStorage.getItem("selectedDestination"),
-      accommodation: sessionStorage.getItem("selectedAccommodation"),
-      totalCost: sessionStorage.getItem("totalCost"), // Retrieve totalCost from sessionStorage
-      date: new Date().toISOString(),
-      status: "Pending", // Add default status
+  const handlePayment = async () => {
+    const formatDateForMySQL = (isoDate) => {
+      const date = new Date(isoDate);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const seconds = String(date.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
 
-    // Save booking to local storage
-    const bookings = JSON.parse(localStorage.getItem("bookings")) || [];
-    bookings.push(bookingDetails);
-    localStorage.setItem("bookings", JSON.stringify(bookings));
+    const bookingDetails = {
+      destination: JSON.parse(sessionStorage.getItem("selectedDestination"))?.title || "Unknown Destination", // Fallback to avoid null
+      accommodation: JSON.parse(sessionStorage.getItem("selectedAccommodation"))?.title || "Unknown Accommodation", // Fallback to avoid null
+      totalCost: sessionStorage.getItem("totalCost") || "0",
+      date: formatDateForMySQL(new Date().toISOString()), // Format the date for MySQL
+      status: "Pending",
+    };
 
-    navigate("/success"); // Redirect to success page
+    console.log("Sending booking details:", bookingDetails); // Debugging log
+
+    try {
+      const response = await axios.post(
+        "http://localhost/img/Travel-Planner/backend/save_booking.php",
+        bookingDetails
+      );
+
+      console.log("API Response:", response.data); // Debugging log
+
+      if (response.data.status === "success") {
+        console.log("Booking saved successfully:", response.data.message);
+        navigate("/success"); // Redirect to success page
+      } else {
+        console.error("Error saving booking:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error during API call:", error);
+    }
   };
 
   return (

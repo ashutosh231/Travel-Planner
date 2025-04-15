@@ -6,6 +6,7 @@ import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.png";
 import { UserContext } from "../App";
+import MeetOurTeam from "./MeetOurTeam";
 
 export default function Navbar() {
   const { isLoggedIn, setIsLoggedIn } = useContext(UserContext);
@@ -61,8 +62,8 @@ export default function Navbar() {
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
     { name: "Accommodation", path: "/accommodation" },
-    { name: "Meet Our Team", path: "/meet-our-team" },
     { name: "My Bookings", path: "/my-bookings" },
+    // { name: "Meet Our Team", path: "/meet-our-team" },
   ];
 
   return (
@@ -179,7 +180,7 @@ export default function Navbar() {
             )}
           </li>
         </ul>
-
+          {/* <buttom className="text-bold">Meet our Team</buttom> */}
         {/* Profile / Login */}
         <div className="hidden md:flex items-center gap-4">
           <Link to="/booking">
