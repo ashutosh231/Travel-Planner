@@ -126,13 +126,20 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost/Travel-Planner/backend/get_user_data.php");
+        // Get email from localStorage
+        const email = localStorage.getItem("userEmail");
+        
+        if (!email) {
+          throw new Error("User not logged in");
+        }
+        
+        const response = await fetch(`http://localhost/img/Travel-Planner/backend/get_user_data.php?email=${email}`);
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
         }
         const data = await response.json();
-        if (!data.name || !data.email) {
-          throw new Error("Invalid user data received");
+        if (data.error) {
+          throw new Error(data.error);
         }
         setUserData(data);
       } catch (error) {

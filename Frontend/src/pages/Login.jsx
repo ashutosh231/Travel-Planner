@@ -19,7 +19,7 @@ const Login = () => {
   const handleLogin = async () => {
     setErrorMessage(""); // Clear previous errors
     try {
-      const response = await fetch("http://localhost/Travel-Planner/backend/login.php", {
+      const response = await fetch("http://localhost/img/Travel-Planner/backend/login.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,6 +34,7 @@ const Login = () => {
       }
       
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userEmail", data.email); // Store email in localStorage
       setIsLoggedIn(true); // Notify context about login
       navigate("/");
       

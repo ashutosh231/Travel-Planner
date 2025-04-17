@@ -28,22 +28,50 @@ export default function MyBookingsPage() {
     bookingDate: "",
     paymentMethod: "",
     checkInDate: null,
-    checkOutDate: null
+    checkOutDate: null,
+    userEmail: ""
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [dbBooking, setDbBooking] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
     }
+    
+    // Get the user's email from localStorage
+    const userEmail = localStorage.getItem("userEmail");
+    if (!userEmail) {
+      // Redirect to login if email is not available
+      navigate("/login");
+    }
   }, [navigate]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const userEmail = localStorage.getItem("userEmail");
     
-    // Simulate loading data from storage or API
-    setTimeout(() => {
+    // First fetch the latest booking for this user from the database
+    const fetchUserBooking = async () => {
+      try {
+        const response = await fetch(`http://localhost/img/Travel-Planner/backend/get_user_bookings.php?email=${userEmail}`);
+        const data = await response.json();
+        
+        if (data.status === "success") {
+          setDbBooking(data.booking);
+          return data.booking.booking_id; // Return the booking ID for reference
+        } else {
+          console.log("No booking found in database or error:", data.message);
+          return null;
+        }
+      } catch (error) {
+        console.error("Error fetching booking:", error);
+        return null;
+      }
+    };
+    
+    const setupBookingData = async () => {
       // Get all booking data from sessionStorage
       const storedDestination = sessionStorage.getItem("selectedDestination");
       const storedAccommodation = sessionStorage.getItem("selectedAccommodation");
@@ -55,15 +83,8 @@ export default function MyBookingsPage() {
       const paymentMethod = sessionStorage.getItem("paymentMethod") || "Credit Card";
       const storedActivities = sessionStorage.getItem("selectedActivities");
       
-      // Generate a random booking ID
-      const generateBookingId = () => {
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        let id = "BK";
-        for (let i = 0; i < 8; i++) {
-          id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
-      };
+      // Get booking ID from database or generate one if not available
+      const dbBookingId = await fetchUserBooking();
       
       // Format current date as booking date
       const formatDate = (date) => {
@@ -74,6 +95,19 @@ export default function MyBookingsPage() {
         });
       };
 
+      // Generate a booking ID only if we don't have one from the database
+      const generateBookingId = () => {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let id = "BK";
+        for (let i = 0; i < 8; i++) {
+          id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return id;
+      };
+      
+      const bookingId = dbBookingId || sessionStorage.getItem("bookingId") || generateBookingId();
+      const bookingDate = formatDate(new Date());
+
       // Set booking data
       setBooking({
         destination: storedDestination ? JSON.parse(storedDestination) : null,
@@ -82,16 +116,50 @@ export default function MyBookingsPage() {
         totalCost: storedTotalCost ? parseFloat(storedTotalCost) : 0,
         members: storedMembers ? JSON.parse(storedMembers) : [],
         selectedActivities: storedActivities ? JSON.parse(storedActivities) : [],
-        bookingId: generateBookingId(),
-        bookingDate: formatDate(new Date()),
+        bookingId: bookingId,
+        bookingDate: bookingDate,
         paymentMethod,
         checkInDate: storedCheckInDate ? formatDate(JSON.parse(storedCheckInDate)) : formatDate(new Date()),
-        checkOutDate: storedCheckOutDate ? formatDate(JSON.parse(storedCheckOutDate)) : formatDate(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000))
+        checkOutDate: storedCheckOutDate ? formatDate(JSON.parse(storedCheckOutDate)) : formatDate(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)),
+        userEmail: userEmail
       });
       
+      // Only save booking to database if we don't already have one and we have all required data
+      if (!dbBookingId && storedDestination && storedAccommodation && storedTotalCost) {
+        saveBookingToDatabase({
+          destination: JSON.parse(storedDestination).title,
+          accommodation: JSON.parse(storedAccommodation).title,
+          totalCost: parseFloat(storedTotalCost),
+          date: bookingDate,
+          status: "Confirmed",
+          email: userEmail,
+          bookingId: bookingId
+        });
+      }
+      
       setIsLoading(false);
-    }, 1000);
+    };
+    
+    setupBookingData();
   }, []);
+  
+  // Function to save booking to database
+  const saveBookingToDatabase = async (bookingData) => {
+    try {
+      const response = await fetch('http://localhost/img/Travel-Planner/backend/save_booking.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData)
+      });
+      
+      const data = await response.json();
+      console.log("Booking saved:", data);
+    } catch (error) {
+      console.error("Error saving booking:", error);
+    }
+  };
 
   // Animation variants
   const containerVariants = {

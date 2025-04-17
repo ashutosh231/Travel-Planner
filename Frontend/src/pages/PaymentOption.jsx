@@ -1,11 +1,36 @@
 import axios from "axios"; // Import axios for API calls
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { FaCreditCard, FaGooglePay, FaApplePay, FaQrcode, FaUniversity } from "react-icons/fa";
 
 export default function FakePaymentPage() {
   const navigate = useNavigate();
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    // Get user email from localStorage when component mounts
+    const email = localStorage.getItem("userEmail");
+    if (email) {
+      setUserEmail(email);
+    } else {
+      // If no email is found, redirect to login
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handlePayment = async () => {
+    // Generate a booking ID with the same format as in MyBookings.jsx
+    const generateBookingId = () => {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let id = "BK";
+      for (let i = 0; i < 8; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return id;
+    };
+
+    const bookingId = generateBookingId();
+
     const formatDateForMySQL = (isoDate) => {
       const date = new Date(isoDate);
       const year = date.getFullYear();
@@ -22,7 +47,9 @@ export default function FakePaymentPage() {
       accommodation: JSON.parse(sessionStorage.getItem("selectedAccommodation"))?.title || "Unknown Accommodation", // Fallback to avoid null
       totalCost: sessionStorage.getItem("totalCost") || "0",
       date: formatDateForMySQL(new Date().toISOString()), // Format the date for MySQL
-      status: "Pending",
+      status: "Confirmed",
+      email: userEmail, // Include the user's email in the booking details
+      bookingId: bookingId // Add the generated bookingId
     };
 
     console.log("Sending booking details:", bookingDetails); // Debugging log
@@ -37,6 +64,10 @@ export default function FakePaymentPage() {
 
       if (response.data.status === "success") {
         console.log("Booking saved successfully:", response.data.message);
+        
+        // Save bookingId to sessionStorage for reference on success page
+        sessionStorage.setItem("bookingId", bookingId);
+        
         navigate("/success"); // Redirect to success page
       } else {
         console.error("Error saving booking:", response.data.message);
@@ -57,7 +88,16 @@ export default function FakePaymentPage() {
 
         {/* QR Code Payment Option */}
         <div className="flex flex-col items-center mb-6">
-          <img src=" https://w7.pngwing.com/pngs/431/554/png-transparent-barcode-scanners-qr-code-2d-code-creative-barcode-miscellaneous-angle-text-thumbnail.png" alt="QR Code" className="w-40 h-40 rounded-lg shadow-lg" />
+          {/* Fixed QR code image URL with proper fallback */}
+          <img 
+            src="https://w7.pngwing.com/pngs/431/554/png-transparent-barcode-scanners-qr-code-2d-code-creative-barcode-miscellaneous-angle-text-thumbnail.png" 
+            alt="QR Code" 
+            className="w-40 h-40 rounded-lg shadow-lg"
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src = "https://via.placeholder.com/150?text=QR+Code";
+            }}
+          />
           <p className="mt-2 text-gray-300 text-sm">Scan the QR Code to Pay</p>
         </div>
 
@@ -72,7 +112,7 @@ export default function FakePaymentPage() {
               <FaCreditCard className="mr-2" /> Credit / Debit Card
             </button>
             <button className="w-full flex items-center justify-center py-3 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-all">
-              <FaGooglePay className="mr-2" /> Upi Apps
+              <FaGooglePay className="mr-2" /> UPI Apps
             </button>
             <button className="w-full flex items-center justify-center py-3 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-all">
               <FaUniversity className="mr-2" /> Net Banking

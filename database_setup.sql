@@ -30,3 +30,15 @@ CREATE TABLE IF NOT EXISTS password_reset (
 );
 
 -- Create bookings table
+CREATE TABLE IF NOT EXISTS bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id VARCHAR(20) NOT NULL,  -- Added field for the booking reference
+    destination VARCHAR(255) NOT NULL,
+    accommodation VARCHAR(255) NOT NULL,
+    total_cost DECIMAL(10, 2) NOT NULL,
+    booking_date DATE NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    booked_by VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,  -- Added email field
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

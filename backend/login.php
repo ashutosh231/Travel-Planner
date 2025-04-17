@@ -35,7 +35,13 @@ if (isset($data->email) && isset($data->password)) {
         $stmt->fetch();
 
         if (password_verify($password, $hashed_password)) {
-            echo json_encode(["status" => "success", "message" => "Login successful", "token" => md5(uniqid())]);
+            // Include the email in the response so it can be stored in localStorage
+            echo json_encode([
+                "status" => "success", 
+                "message" => "Login successful", 
+                "token" => md5(uniqid()),
+                "email" => $email  // Include the email in the response
+            ]);
         } else {
             echo json_encode(["status" => "error", "message" => "Invalid credentials"]);
         }
