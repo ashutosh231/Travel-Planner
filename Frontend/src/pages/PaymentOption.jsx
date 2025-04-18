@@ -6,6 +6,7 @@ import { FaCreditCard, FaGooglePay, FaApplePay, FaQrcode, FaUniversity } from "r
 export default function FakePaymentPage() {
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // Get user email from localStorage when component mounts
@@ -19,6 +20,9 @@ export default function FakePaymentPage() {
   }, [navigate]);
 
   const handlePayment = async () => {
+    // Show processing state
+    setIsProcessing(true);
+    
     // Generate a booking ID with the same format as in MyBookings.jsx
     const generateBookingId = () => {
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -42,38 +46,68 @@ export default function FakePaymentPage() {
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
 
+    // Get stored booking information
+    const destination = JSON.parse(sessionStorage.getItem("selectedDestination")) || { title: "Unknown Destination" };
+    const accommodation = JSON.parse(sessionStorage.getItem("selectedAccommodation")) || { title: "Unknown Accommodation" };
+    const totalCost = sessionStorage.getItem("totalCost") || "0";
+    const bookingDates = JSON.parse(sessionStorage.getItem("bookingDates")) || {};
+
     const bookingDetails = {
-      destination: JSON.parse(sessionStorage.getItem("selectedDestination"))?.title || "Unknown Destination", // Fallback to avoid null
-      accommodation: JSON.parse(sessionStorage.getItem("selectedAccommodation"))?.title || "Unknown Accommodation", // Fallback to avoid null
-      totalCost: sessionStorage.getItem("totalCost") || "0",
-      date: formatDateForMySQL(new Date().toISOString()), // Format the date for MySQL
+      destination: destination.title,
+      accommodation: accommodation.title,
+      totalCost: totalCost,
+      date: formatDateForMySQL(new Date().toISOString()),
       status: "Confirmed",
-      email: userEmail, // Include the user's email in the booking details
-      bookingId: bookingId // Add the generated bookingId
+      email: userEmail,
+      bookingId: bookingId
     };
 
-    console.log("Sending booking details:", bookingDetails); // Debugging log
-
     try {
-      const response = await axios.post(
+      // Step 1: Save booking to database
+      const saveResponse = await axios.post(
         "http://localhost/img/Travel-Planner/backend/save_booking.php",
         bookingDetails
       );
 
-      console.log("API Response:", response.data); // Debugging log
+      console.log("Booking saved:", saveResponse.data);
 
-      if (response.data.status === "success") {
-        console.log("Booking saved successfully:", response.data.message);
+      if (saveResponse.data.status === "success") {
+        // Step 2: Send confirmation email
+        const emailData = {
+          email: userEmail,
+          bookingId: bookingId,
+          destination: destination.title,
+          accommodation: accommodation.title,
+          totalCost: totalCost,
+          checkIn: bookingDates.checkIn,
+          checkOut: bookingDates.checkOut
+        };
+
+        try {
+          const emailResponse = await axios.post(
+            "http://localhost/img/Travel-Planner/backend/send_booking_confirmation.php",
+            emailData
+          );
+
+          console.log("Email confirmation sent:", emailResponse.data);
+        } catch (emailError) {
+          console.error("Error sending confirmation email:", emailError);
+        }
         
         // Save bookingId to sessionStorage for reference on success page
         sessionStorage.setItem("bookingId", bookingId);
         
-        navigate("/success"); // Redirect to success page
+        // Navigate to success page regardless of email success
+        navigate("/success");
       } else {
-        console.error("Error saving booking:", response.data.message);
+        console.error("Error saving booking:", saveResponse.data.message);
+        alert("There was an error processing your payment. Please try again.");
+        setIsProcessing(false);
       }
     } catch (error) {
       console.error("Error during API call:", error);
+      alert("There was an error processing your payment. Please try again.");
+      setIsProcessing(false);
     }
   };
 
@@ -122,11 +156,27 @@ export default function FakePaymentPage() {
 
         {/* Pay Now Button */}
         <button
-          className="w-full py-4 bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold text-lg rounded-full shadow-lg hover:from-green-600 hover:to-blue-600 transition-all"
+          className={`w-full py-4 ${isProcessing ? 'bg-gray-500' : 'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600'} text-white font-bold text-lg rounded-full shadow-lg transition-all flex justify-center items-center`}
           onClick={handlePayment}
+          disabled={isProcessing}
         >
-          Pay Now
+          {isProcessing ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            </>
+          ) : (
+            'Pay Now'
+          )}
         </button>
+        
+        {/* Added note about confirmation email */}
+        <p className="text-center text-gray-400 text-sm mt-4">
+          A confirmation email will be sent to your registered email address after successful payment.
+        </p>
       </div>
     </div>
   );
