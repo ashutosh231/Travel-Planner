@@ -54,10 +54,9 @@ if (isset($data->email) && isset($data->password)) {
         }
 
         if ($password_verified) {
-            // Include the email and admin status in the response
             echo json_encode([
-                "status" => "success", 
-                "message" => "Login successful", 
+                "status" => "success",
+                "message" => "Login successful",
                 "token" => md5(uniqid()),
                 "email" => $email,
                 "is_admin" => $is_admin ? true : false

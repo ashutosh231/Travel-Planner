@@ -39,7 +39,6 @@ const Login = () => {
       localStorage.setItem("userEmail", data.email); // Store email in localStorage
 
       if (loginType === "admin" && data.is_admin) {
-        console.log("Admin login detected!");
         localStorage.setItem("isAdmin", "true");
         setIsLoggedIn(true); // Notify context about login
         setTimeout(() => {

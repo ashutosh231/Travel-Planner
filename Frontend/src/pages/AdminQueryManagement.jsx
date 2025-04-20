@@ -15,14 +15,13 @@ export default function AdminQueryManagement() {
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
-    // Check if user is admin
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
     if (!isAdmin) {
       navigate("/login");
       return;
     }
-    
     fetchQueries();
-  }, [navigate, isAdmin, filter]);
+  }, [navigate, filter]);
 
   const fetchQueries = async () => {
     setIsLoading(true);
