@@ -27,6 +27,30 @@ $data = json_decode(file_get_contents("php://input"), true);
 // Debugging: Log the received data
 file_put_contents("php://stderr", "Received Data: " . print_r($data, true));
 
+// Check if bookings table has necessary columns
+$tableCheck = $conn->query("DESCRIBE bookings");
+$columns = [];
+while ($row = $tableCheck->fetch_assoc()) {
+    $columns[] = $row['Field'];
+}
+
+// Debug log columns
+file_put_contents("php://stderr", "Existing columns: " . implode(", ", $columns) . "\n");
+
+// Check if admin_status column exists
+if (!in_array('admin_status', $columns)) {
+    // Add admin_status column
+    file_put_contents("php://stderr", "Adding missing admin_status column\n");
+    $conn->query("ALTER TABLE bookings ADD COLUMN admin_status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending'");
+}
+
+// Check if created_at column exists
+if (!in_array('created_at', $columns)) {
+    // Add created_at column
+    file_put_contents("php://stderr", "Adding missing created_at column\n");
+    $conn->query("ALTER TABLE bookings ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+}
+
 // Check if all required fields are present
 if (isset($data['destination'], $data['accommodation'], $data['totalCost'], $data['date'], $data['status'], $data['email'], $data['bookingId'])) {
     $destination = $conn->real_escape_string($data['destination']);
@@ -48,26 +72,104 @@ if (isset($data['destination'], $data['accommodation'], $data['totalCost'], $dat
         $user = $nameResult->fetch_assoc();
         $bookedBy = $conn->real_escape_string($user['name']);
         
-        // Insert booking with the user's name, email and booking ID
-        $sql = "INSERT INTO bookings (booking_id, destination, accommodation, total_cost, booking_date, status, booked_by, email) 
-                VALUES ('$bookingId', '$destination', '$accommodation', '$totalCost', '$date', '$status', '$bookedBy', '$email')";
+        // Check if booking already exists
+        $checkStmt = $conn->prepare("SELECT * FROM bookings WHERE booking_id = ?");
+        $checkStmt->bind_param("s", $bookingId);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
         
-        // Debugging: Log the SQL query
-        file_put_contents("php://stderr", "SQL Query: $sql\n");
-        
-        if ($conn->query($sql) === TRUE) {
-            echo json_encode([
-                "status" => "success", 
-                "message" => "Booking saved successfully",
-                "booking_id" => $bookingId,
-                "booked_by" => $bookedBy,
-                "email" => $email
-            ]);
+        if ($checkResult->num_rows > 0) {
+            // Booking already exists, update it
+            file_put_contents("php://stderr", "Booking already exists, updating...\n");
+            $updateSql = "UPDATE bookings SET 
+                          destination = ?, 
+                          accommodation = ?, 
+                          total_cost = ?, 
+                          booking_date = ?, 
+                          status = ?, 
+                          booked_by = ?, 
+                          email = ? 
+                          WHERE booking_id = ?";
+                          
+            $updateStmt = $conn->prepare($updateSql);
+            $updateStmt->bind_param("ssssssss", 
+                $destination, 
+                $accommodation, 
+                $totalCost, 
+                $date, 
+                $status, 
+                $bookedBy, 
+                $email, 
+                $bookingId
+            );
+            
+            if ($updateStmt->execute()) {
+                echo json_encode([
+                    "status" => "success", 
+                    "message" => "Booking updated successfully",
+                    "booking_id" => $bookingId,
+                    "booked_by" => $bookedBy,
+                    "email" => $email
+                ]);
+            } else {
+                file_put_contents("php://stderr", "SQL Error on update: " . $updateStmt->error . "\n");
+                echo json_encode(["status" => "error", "message" => "Error updating booking: " . $updateStmt->error]);
+            }
+            
+            $updateStmt->close();
         } else {
-            // Debugging: Log the SQL error
-            file_put_contents("php://stderr", "SQL Error: " . $conn->error . "\n");
-            echo json_encode(["status" => "error", "message" => "Error saving booking: " . $conn->error]);
+            // Insert new booking
+            file_put_contents("php://stderr", "Creating new booking...\n");
+            $insertSql = "INSERT INTO bookings 
+                         (booking_id, destination, accommodation, total_cost, booking_date, status, booked_by, email, admin_status) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')";
+                        
+            $insertStmt = $conn->prepare($insertSql);
+            $insertStmt->bind_param("ssssssss", 
+                $bookingId, 
+                $destination, 
+                $accommodation, 
+                $totalCost, 
+                $date, 
+                $status, 
+                $bookedBy, 
+                $email
+            );
+            
+            if ($insertStmt->execute()) {
+                echo json_encode([
+                    "status" => "success", 
+                    "message" => "Booking saved successfully",
+                    "booking_id" => $bookingId,
+                    "booked_by" => $bookedBy,
+                    "email" => $email
+                ]);
+                
+                // Trigger admin notification - you would call the notification API here
+                // This is a simplified approach - in production you might want to use a job queue
+                $adminNotifyUrl = "http://localhost/img/Travel-Planner/backend/notify_admin_new_booking.php";
+                $adminNotifyData = json_encode(["bookingId" => $bookingId]);
+                
+                $ch = curl_init($adminNotifyUrl);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $adminNotifyData);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                    'Content-Type: application/json',
+                    'Content-Length: ' . strlen($adminNotifyData)
+                ));
+                
+                $result = curl_exec($ch);
+                curl_close($ch);
+            } else {
+                file_put_contents("php://stderr", "SQL Error on insert: " . $insertStmt->error . "\n");
+                echo json_encode(["status" => "error", "message" => "Error saving booking: " . $insertStmt->error]);
+            }
+            
+            $insertStmt->close();
         }
+        
+        $checkStmt->close();
     } else {
         echo json_encode(["status" => "error", "message" => "User not found with email: " . $email]);
     }

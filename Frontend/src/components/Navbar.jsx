@@ -269,10 +269,37 @@ export default function Navbar() {
                       </Link>
                     </motion.li>
                     
+                    {/* Add Ask Query option */}
                     <motion.li 
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.15 }}
+                      className="relative"
+                    >
+                      <Link
+                        to="/user-queries"
+                        className="relative z-10 w-full flex items-center space-x-2 px-3 py-2 hover:bg-white/10 transition-all duration-300 group"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        <span className="w-7 h-7 flex items-center justify-center rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 
+                              group-hover:from-amber-500/40 group-hover:to-orange-500/40 transition-all duration-300
+                              shadow-[0_0_10px_rgba(245,158,11,0.3)] group-hover:shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+                          <svg className="w-4 h-4 text-amber-300 group-hover:text-amber-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                          </svg>
+                        </span>
+                        <span className="text-white/90 group-hover:text-white font-medium text-sm">Ask Query</span>
+                        
+                        {/* Hover indicator line */}
+                        <span className="absolute bottom-0 left-0 h-[1px] w-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent 
+                               group-hover:w-full transition-all duration-500"></span>
+                      </Link>
+                    </motion.li>
+                    
+                    <motion.li 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
                       className="relative"
                     >
                       <button

@@ -24,23 +24,43 @@ if (isset($data->email) && isset($data->password)) {
     $email = $data->email;
     $password = $data->password;
 
-    // Prepare and execute SQL query
-    $stmt = $conn->prepare("SELECT id, hashed_password FROM users WHERE email = ?");
+    // Debugging - Log attempt (remove in production)
+    error_log("Login attempt: $email with password: $password");
+
+    // Prepare and execute SQL query - check for is_admin status
+    $stmt = $conn->prepare("SELECT id, password, hashed_password, is_admin FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
 
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($id, $hashed_password);
+        $stmt->bind_result($id, $stored_password, $hashed_password, $is_admin);
         $stmt->fetch();
 
-        if (password_verify($password, $hashed_password)) {
-            // Include the email in the response so it can be stored in localStorage
+        // For debugging - check what's stored (remove in production)
+        error_log("Stored Password: $stored_password");
+        error_log("Hashed Password: $hashed_password");
+        error_log("Is Admin: $is_admin");
+
+        // Try first with password_verify (for proper hashed passwords)
+        $password_verified = false;
+        
+        if ($hashed_password && password_verify($password, $hashed_password)) {
+            $password_verified = true;
+        } 
+        // Fallback to direct comparison (for testing or if plain text stored)
+        else if ($password === $stored_password) {
+            $password_verified = true;
+        }
+
+        if ($password_verified) {
+            // Include the email and admin status in the response
             echo json_encode([
                 "status" => "success", 
                 "message" => "Login successful", 
                 "token" => md5(uniqid()),
-                "email" => $email  // Include the email in the response
+                "email" => $email,
+                "is_admin" => $is_admin ? true : false
             ]);
         } else {
             echo json_encode(["status" => "error", "message" => "Invalid credentials"]);

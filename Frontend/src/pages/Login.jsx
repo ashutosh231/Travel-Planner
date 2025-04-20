@@ -10,6 +10,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const [loginType, setLoginType] = useState("user"); // "user" or "admin"
 
   // Animation effect when page loads
   useEffect(() => {
@@ -26,23 +27,37 @@ const Login = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-      
+
       const data = await response.json();
-      
-      if (!response.ok || data.status !== 'success') {
+      console.log("Login response:", data); // Debugging
+
+      if (!response.ok || data.status !== "success") {
         throw new Error(data.message || "Invalid email or password");
       }
-      
+
       localStorage.setItem("token", data.token);
       localStorage.setItem("userEmail", data.email); // Store email in localStorage
-      setIsLoggedIn(true); // Notify context about login
-      navigate("/");
-      
+
+      if (loginType === "admin" && data.is_admin) {
+        console.log("Admin login detected!");
+        localStorage.setItem("isAdmin", "true");
+        setIsLoggedIn(true); // Notify context about login
+        setTimeout(() => {
+          navigate("/admin", { replace: true }); // Delay navigation to ensure state updates
+        }, 100); // Small delay to ensure state propagation
+      } else if (loginType === "user" && !data.is_admin) {
+        localStorage.setItem("isAdmin", "false");
+        setIsLoggedIn(true); // Notify context about login
+        navigate("/", { replace: true }); // Ensure navigation replaces the current page
+      } else {
+        throw new Error("Invalid login type for this account.");
+      }
     } catch (error) {
+      console.error("Login error:", error);
       setErrorMessage(error.message);
     }
   };
-  
+
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-gradient-to-br from-richblack-900 via-purple-900/20 to-richblack-800">
       {/* Animated background elements */}
@@ -76,6 +91,18 @@ const Login = () => {
                 {errorMessage}
               </div>
             )}
+
+            {/* Dropdown for login type */}
+            <div className="w-full mb-6">
+              <select
+                value={loginType}
+                onChange={(e) => setLoginType(e.target.value)}
+                className="w-full bg-white/20 rounded-xl p-4 text-lg text-gray-200 placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/30 transition duration-300"
+              >
+                <option value="user">User Login</option>
+                <option value="admin">Admin Login</option>
+              </select>
+            </div>
 
             <div className="w-full flex flex-col gap-6">
               <div className={`transform transition-all duration-500 delay-100 ${isPageLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
