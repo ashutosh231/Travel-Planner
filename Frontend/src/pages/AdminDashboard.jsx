@@ -21,7 +21,9 @@ import {
   FaUserPlus,
   FaTrash,
   FaEye,
-  FaCalendarAlt
+  FaCalendarAlt,
+  FaStar,
+  FaMapMarkedAlt
 } from "react-icons/fa";
 
 export default function AdminDashboard() {
@@ -43,6 +45,13 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
   const [topDestinations, setTopDestinations] = useState([]);
+  const [topRatedDestinations, setTopRatedDestinations] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewFilter, setReviewFilter] = useState({
+    destination: "",
+    rating: 0
+  });
 
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
@@ -58,6 +67,7 @@ export default function AdminDashboard() {
     fetchUsers();
     fetchRecentActivities();
     fetchTopDestinations();
+    fetchTopRatedDestinations();
   }, [navigate]);
 
   useEffect(() => {
@@ -196,6 +206,51 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchTopRatedDestinations = async () => {
+    try {
+      const response = await axios.get("http://localhost/img/Travel-Planner/backend/get_top_rated_destinations.php");
+      if (response.data.status === "success") {
+        setTopRatedDestinations(response.data.destinations);
+      } else {
+        setTopRatedDestinations([]);
+      }
+    } catch (error) {
+      console.error("Error fetching top rated destinations:", error);
+      setTopRatedDestinations([]);
+    }
+  };
+
+  const fetchReviews = async (filters = {}) => {
+    setReviewsLoading(true);
+    try {
+      let url = "http://localhost/img/Travel-Planner/backend/get_all_reviews.php";
+      
+      const params = new URLSearchParams();
+      if (filters.destination) params.append("destination", filters.destination);
+      if (filters.rating > 0) params.append("rating", filters.rating);
+      if (params.toString()) url += "?" + params.toString();
+      
+      const response = await axios.get(url);
+      if (response.data.status === "success") {
+        setReviews(response.data.reviews || []);
+      } else {
+        console.error("Failed to fetch reviews:", response.data.message);
+        setReviews([]);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSection === "reviews") {
+      fetchReviews(reviewFilter);
+    }
+  }, [activeSection, reviewFilter]);
+
   const handleLogout = () => {
     localStorage.removeItem("userEmail");
     localStorage.removeItem("isAdmin");
@@ -317,6 +372,15 @@ export default function AdminDashboard() {
             <FaClipboardList className="w-5 h-5 mr-3" />
             Queries
           </Link>
+          <button
+            onClick={() => setActiveSection("reviews")}
+            className={`w-full flex items-center px-4 py-3 rounded-lg ${
+              activeSection === "reviews" ? "bg-blue-600 text-white" : "text-gray-300 hover:bg-white/10"
+            }`}
+          >
+            <FaStar className="w-5 h-5 mr-3" />
+            Reviews
+          </button>
           <button
             onClick={handleLogout}
             className="w-full flex items-center px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white rounded-lg"
@@ -452,6 +516,50 @@ export default function AdminDashboard() {
                     <p className="text-gray-400">No top destinations found.</p>
                   )}
                 </div>
+              </div>
+            </div>
+            
+            {/* Top Rated Destinations Section */}
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+                <FaMapMarkedAlt className="text-green-500 mr-2" />
+                Top Rated Destinations
+              </h3>
+              <div className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl rounded-xl p-6">
+                {topRatedDestinations.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {topRatedDestinations.map((destination, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-700/50 rounded-lg p-3 border border-gray-700 hover:shadow-md transition-shadow duration-300"
+                      >
+                        <div className="flex items-start">
+                          <div className="p-2 rounded-lg bg-green-900/30 mr-3">
+                            <FaStar className="text-yellow-400" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <span className="font-medium text-white">{destination.name}</span>
+                              <div className="flex items-center bg-yellow-900/30 px-2 py-1 rounded-lg">
+                                <FaStar className="text-yellow-400 mr-1" />
+                                <span className="text-yellow-200">{destination.average_rating}/5</span>
+                              </div>
+                            </div>
+                            <p className="text-gray-300 text-sm mt-1">
+                              {destination.reviewCount} reviews • {destination.bookingCount} bookings
+                            </p>
+                            <div className="flex justify-between mt-2">
+                              <span className="text-green-400 text-sm">₹{parseInt(destination.avgCost).toLocaleString()} avg</span>
+                              <span className="text-blue-300 text-sm">{destination.popular_accommodation || 'Various'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-center">No rated destinations found. Encourage users to leave reviews!</p>
+                )}
               </div>
             </div>
           </div>
@@ -694,6 +802,116 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeSection === "reviews" && (
+          <div>
+            <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-6">
+              Customer Reviews
+            </h2>
+            
+            {/* Filter Controls */}
+            <div className="mb-6 flex flex-wrap gap-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Filter by destination..."
+                  value={reviewFilter.destination}
+                  onChange={(e) => setReviewFilter({...reviewFilter, destination: e.target.value})}
+                  className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                {[0, 1, 2, 3, 4, 5].map(star => (
+                  <button
+                    key={star}
+                    onClick={() => setReviewFilter({...reviewFilter, rating: star})}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg border ${
+                      reviewFilter.rating === star ? 
+                      'bg-yellow-500 border-yellow-600 text-white' : 
+                      'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'
+                    }`}
+                  >
+                    {star === 0 ? 'All' : <FaStar />}
+                  </button>
+                ))}
+              </div>
+              
+              <button
+                onClick={() => fetchReviews(reviewFilter)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Apply Filter
+              </button>
+              
+              <button
+                onClick={() => {
+                  setReviewFilter({ destination: "", rating: 0 });
+                  fetchReviews({ destination: "", rating: 0 });
+                }}
+                className="px-4 py-2 bg-gray-700 text-gray-200 rounded-lg hover:bg-gray-600 transition"
+              >
+                Clear Filters
+              </button>
+            </div>
+            
+            {/* Reviews List */}
+            <div className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl rounded-xl overflow-hidden">
+              {reviewsLoading ? (
+                <div className="py-12 flex justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : reviews.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                  {reviews.map((review) => (
+                    <div 
+                      key={review.id} 
+                      className="bg-gray-800 rounded-lg p-4 border border-white/10 hover:border-blue-500/30 transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="text-white font-medium">{review.user_name || "Customer"}</h3>
+                          <p className="text-sm text-gray-400">{review.user_email}</p>
+                        </div>
+                        <div className="flex items-center bg-yellow-900/30 px-2 py-1 rounded-lg">
+                          <FaStar className="text-yellow-500 mr-1" />
+                          <span className="text-yellow-200">{review.rating}/5</span>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="text-sm text-blue-300 mb-1">Destination:</div>
+                        <p className="text-white">{review.destination}</p>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="text-sm text-purple-300 mb-1">Accommodation:</div>
+                        <p className="text-white">{review.accommodation}</p>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="text-sm text-gray-400 mb-1">Review:</div>
+                        <p className="text-gray-200 bg-black/20 p-3 rounded-lg max-h-32 overflow-y-auto">
+                          {review.review_text || "No comments provided."}
+                        </p>
+                      </div>
+                      
+                      <div className="mt-3 text-xs text-gray-400 flex justify-between">
+                        <span>Booking ID: {review.booking_id}</span>
+                        <span>{review.created_at_formatted}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-12 text-center text-gray-400">
+                  <div className="text-5xl mb-4">🔍</div>
+                  <p>No reviews found. Adjust your filters or check back later.</p>
+                </div>
+              )}
             </div>
           </div>
         )}

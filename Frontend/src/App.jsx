@@ -27,6 +27,7 @@ import MeetOurTeam from "./components/MeetOurTeam"; // New import
 import AdminDashboard from "./pages/AdminDashboard"; // New import
 import UserQueries from "./pages/UserQueries"; // New import
 import AdminQueryManagement from "./pages/AdminQueryManagement"; // New import
+import Reviews from "./pages/Reviews"; // New import
 import { createContext, useState } from "react";
 
 export const UserContext = createContext();
@@ -82,6 +83,7 @@ function App() {
           <Route path="/accomodation-details" element={<AccommodationDetails />} />
           <Route path="/meet-our-team" element={<MeetOurTeam />} />
           <Route path="/user-queries" element={<UserQueries />} />
+          <Route path="/reviews" element={<Reviews />} />
           
           {/* Admin Routes with protected access */}
           <Route 

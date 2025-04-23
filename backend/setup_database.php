@@ -79,6 +79,33 @@ if ($tableResult->num_rows == 0) {
     }
 }
 
+// Check if reviews table exists
+$tableResult = $conn->query("SHOW TABLES LIKE 'reviews'");
+if ($tableResult->num_rows == 0) {
+    echo "<p>❌ Reviews table does not exist. Creating...</p>";
+    
+    $createTableSQL = "CREATE TABLE reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        booking_id VARCHAR(20) NOT NULL,
+        user_email VARCHAR(255) NOT NULL,
+        destination VARCHAR(255) NOT NULL,
+        accommodation VARCHAR(255) NOT NULL,
+        rating INT NOT NULL,
+        review_text TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_booking_review (booking_id)
+    )";
+    
+    if ($conn->query($createTableSQL)) {
+        echo "<p>✅ Created reviews table successfully.</p>";
+    } else {
+        echo "<p>❌ Error creating reviews table: " . $conn->error . "</p>";
+    }
+} else {
+    echo "<p>✅ Reviews table exists.</p>";
+}
+
 // Check if users table exists
 $tableResult = $conn->query("SHOW TABLES LIKE 'users'");
 if ($tableResult->num_rows == 0) {

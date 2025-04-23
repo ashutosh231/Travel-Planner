@@ -595,6 +595,14 @@ export default function MyBookingsPage() {
               <FaTicketAlt className="text-white" />
               <span className="font-medium">New Booking</span>
             </button>
+            <button
+              className="flex-1 py-3 px-6 bg-gray-800/50 hover:bg-gray-800/70 border border-white/10 rounded-xl transition duration-300 flex items-center justify-center gap-2"
+              onClick={() => {
+                navigate("/reviews");
+              }}
+            >
+              <span>Add Ratings and Reviews</span>
+            </button>
           </motion.div>
         </motion.div>
       </div>

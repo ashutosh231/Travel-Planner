@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 }
 
 // Admin credentials
-$admin_email = "admin@example.com";
+$admin_email = "adiashuto10@gmail.com";
 $admin_password = "Admin@123";
 $admin_name = "Admin User";
 
