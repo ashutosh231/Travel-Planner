@@ -1,10 +1,11 @@
 [build]
-  command = "cd Frontend && npm install && npm run build"
+  command = "cd Frontend && npm ci --include=dev && npm run build"
   publish = "Frontend/dist"
   functions = "netlify/functions"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [[redirects]]
   from = "/api/*"
