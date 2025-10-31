@@ -13,16 +13,17 @@ A comprehensive travel planning and booking platform built with modern technolog
 
 ### Frontend
 - **Framework**: React + Vite
-- **Styling**: CSS Modules
+- **Styling**: CSS Modules + Tailwind CSS
 - **State**: React Hooks
 - **HTTP**: Fetch API
+- **Animations**: Framer Motion
 
 ## ✨ Features
 
 - 👤 **User Authentication**
   - Sign up / Login
   - Password reset with OTP
-  - Profile management
+  - Profile management with photo upload
 
 - 🏨 **Booking System**
   - Browse destinations
@@ -48,9 +49,109 @@ A comprehensive travel planning and booking platform built with modern technolog
 
 ## 📋 Prerequisites
 
-- Node.js (v14 or higher)
-- MongoDB (v4.4 or higher)
-- npm or yarn
+- Node.js 18+
+- MongoDB Atlas account (or local MongoDB)
+- Gmail account (for email notifications)
+
+## 🛠️ Installation
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/AryanCodeWizard/Travel-Planner.git
+cd Travel-Planner
+```
+
+### 2. Setup Backend
+```bash
+cd backend
+npm install
+
+# Create .env file
+cp .env.example .env
+# Edit .env with your credentials
+```
+
+### 3. Setup Frontend
+```bash
+cd Frontend
+npm install
+
+# Create .env file
+cp .env.example .env
+# Edit with your API URL
+```
+
+## 🔐 Environment Variables
+
+### Backend (.env)
+```env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_gmail_app_password
+EMAIL_FROM=Travel Planner <your_email@gmail.com>
+NODE_ENV=development
+PORT=3000
+```
+
+### Frontend (.env)
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+## 🚀 Running the Application
+
+### Development Mode
+
+**Backend:**
+```bash
+cd backend
+npm start
+```
+
+**Frontend:**
+```bash
+cd Frontend
+npm run dev
+```
+
+Visit: `http://localhost:5173`
+
+## 📦 Deployment
+
+This application is deployed on Netlify with:
+- Frontend: Static site hosting
+- Backend: Netlify Functions (Serverless)
+- Database: MongoDB Atlas
+
+## 🎯 Usage
+
+1. **User Registration**: Create an account with email verification
+2. **Browse Destinations**: Explore available travel destinations
+3. **Make Bookings**: Book your preferred destination
+4. **Track Bookings**: View and manage your bookings
+5. **Leave Reviews**: Share your experience after travel
+6. **Admin Access**: Manage platform operations (admin only)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 👥 Team
+
+Developed by AryanCodeWizard and team.
+
+## 📧 Contact
+
+For any queries or support, please contact through the application's query system.
+
+---
+
+⭐ Star this repository if you find it helpful!
 
 ## 🛠️ Installation & Setup
 
