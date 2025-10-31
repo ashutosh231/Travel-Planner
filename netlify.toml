@@ -22,6 +22,9 @@
   external_node_modules = ["mongoose", "express", "bcryptjs", "bcrypt", "jsonwebtoken", "nodemailer", "cors", "dotenv"]
   included_files = ["backend/**", "PHPMailer/**"]
 
+[[functions]]
+  timeout = 30
+
 [[headers]]
   for = "/*"
   [headers.values]

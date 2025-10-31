@@ -25,25 +25,6 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Connect to MongoDB
-let isConnected = false;
-
-const dbConnect = async () => {
-  if (isConnected) {
-    console.log('Using existing MongoDB connection');
-    return;
-  }
-  
-  try {
-    await connectDB();
-    isConnected = true;
-    console.log('New MongoDB connection established');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    throw error;
-  }
-};
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
@@ -79,11 +60,36 @@ app.get('/api', (req, res) => {
   });
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: err.message 
+  });
+});
+
 // Ensure database connection before handling requests
 const handler = async (event, context) => {
+  // Prevent function from timing out
   context.callbackWaitsForEmptyEventLoop = false;
-  await dbConnect();
-  return serverless(app)(event, context);
+  
+  try {
+    // Connect to database
+    await connectDB();
+    
+    // Handle request
+    return await serverless(app)(event, context);
+  } catch (error) {
+    console.error('Function error:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ 
+        error: 'Database connection failed',
+        message: error.message 
+      })
+    };
+  }
 };
 
 export { handler };
