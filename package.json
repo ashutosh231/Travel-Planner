@@ -1,0 +1,22 @@
+{
+  "name": "travel-planner",
+  "version": "1.0.0",
+  "description": "Travel Planner - Full Stack Application",
+  "type": "module",
+  "scripts": {
+    "build": "cd Frontend && npm install && npm run build",
+    "dev:frontend": "cd Frontend && npm run dev",
+    "dev:backend": "cd backend && npm start"
+  },
+  "dependencies": {
+    "serverless-http": "^3.2.0"
+  },
+  "keywords": [
+    "travel",
+    "planner",
+    "booking",
+    "tourism"
+  ],
+  "author": "AryanCodeWizard",
+  "license": "MIT"
+}
