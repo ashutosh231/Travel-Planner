@@ -20,7 +20,7 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["mongoose", "express", "bcryptjs", "bcrypt", "jsonwebtoken", "nodemailer", "cors", "dotenv"]
-  included_files = ["backend/**", "PHPMailer/**"]
+  included_files = ["backend/**"]
 
 [[functions]]
   timeout = 30
