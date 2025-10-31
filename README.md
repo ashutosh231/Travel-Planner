@@ -1,4 +1,303 @@
-# 🌍 Travel Planner Application
+# 🌍 Travel Planner - Full Stack Application
+
+A comprehensive travel planning and booking platform built with modern technologies.
+
+## 🚀 Tech Stack
+
+### Backend
+- **Runtime**: Node.js + Express.js
+- **Database**: MongoDB + Mongoose
+- **Authentication**: Bcrypt password hashing
+- **Email**: Nodemailer (OTP, notifications)
+- **API**: RESTful architecture
+
+### Frontend
+- **Framework**: React + Vite
+- **Styling**: CSS Modules
+- **State**: React Hooks
+- **HTTP**: Fetch API
+
+## ✨ Features
+
+- 👤 **User Authentication**
+  - Sign up / Login
+  - Password reset with OTP
+  - Profile management
+
+- 🏨 **Booking System**
+  - Browse destinations
+  - Book accommodations
+  - View booking history
+  - Booking status tracking
+
+- ⭐ **Reviews & Ratings**
+  - Submit reviews for bookings
+  - View all reviews
+  - Rating system (1-5 stars)
+
+- 💬 **Query Management**
+  - Submit support queries
+  - Admin responses
+  - Query status tracking
+
+- 👨‍💼 **Admin Dashboard**
+  - Manage users
+  - Manage bookings
+  - Handle queries
+  - View analytics
+
+## 📋 Prerequisites
+
+- Node.js (v14 or higher)
+- MongoDB (v4.4 or higher)
+- npm or yarn
+
+## 🛠️ Installation & Setup
+
+### 1. Install MongoDB
+
+**macOS:**
+```bash
+brew tap mongodb/brew
+brew install mongodb-community
+brew services start mongodb-community
+```
+
+**Windows:** Download from [MongoDB Website](https://www.mongodb.com/try/download/community)
+
+**Linux (Ubuntu):**
+```bash
+sudo apt-get install -y mongodb-org
+sudo systemctl start mongod
+```
+
+### 2. Clone and Install
+
+```bash
+git clone https://github.com/AryanCodeWizard/Travel-Planner.git
+cd Travel-Planner
+```
+
+### 3. Backend Setup
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Edit .env with your configuration
+npm run dev
+```
+
+Backend runs on: `http://localhost:3000`
+
+### 4. Frontend Setup
+
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+Frontend runs on: `http://localhost:5173`
+
+## 🔧 Configuration
+
+### Backend Environment Variables (.env)
+
+```env
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/tour_planner
+
+# Server
+PORT=3000
+NODE_ENV=development
+
+# CORS
+CORS_ORIGIN=http://localhost:5173
+
+# Email (Optional)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+```
+
+### Frontend Environment Variables (.env)
+
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
+## 📡 API Endpoints
+
+### Authentication
+- `POST /api/auth/signup` - Register new user
+- `POST /api/auth/login` - User login
+- `POST /api/auth/forgot-password` - Request OTP
+- `POST /api/auth/verify-otp` - Verify OTP
+- `POST /api/auth/reset-password` - Reset password
+
+### User
+- `GET /api/user/data` - Get user profile
+- `POST /api/user/update` - Update profile
+
+### Bookings
+- `POST /api/booking/save` - Create booking
+- `GET /api/booking/user-bookings` - Get user bookings
+- `GET /api/booking/recent-activities` - Recent bookings
+
+### Reviews
+- `POST /api/review/submit` - Submit review
+- `GET /api/review/all` - Get all reviews
+
+### Admin
+- `GET /api/admin/users` - Get all users
+- `GET /api/admin/bookings` - Get all bookings
+- `POST /api/admin/update-booking` - Update booking
+- `DELETE /api/admin/delete-booking/:id` - Delete booking
+
+## 📁 Project Structure
+
+```
+Travel-Planner/
+├── backend/
+│   ├── config/
+│   │   └── database.js
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Booking.js
+│   │   ├── Review.js
+│   │   └── Query.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── user.js
+│   │   ├── booking.js
+│   │   ├── admin.js
+│   │   ├── review.js
+│   │   └── query.js
+│   ├── utils/
+│   │   └── mailer.js
+│   └── server.js
+│
+├── Frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── config/
+│   │   │   └── api.js
+│   │   └── App.jsx
+│   └── index.html
+│
+└── docs/
+    ├── QUICK_START.md
+    ├── MONGODB_SETUP.md
+    ├── MIGRATION_GUIDE.md
+    └── MIGRATION_SUMMARY.md
+```
+
+## 🚀 Quick Start
+
+```bash
+# Terminal 1: Start MongoDB
+brew services start mongodb-community  # macOS
+sudo systemctl start mongod            # Linux
+
+# Terminal 2: Start Backend
+cd backend && npm run dev
+
+# Terminal 3: Start Frontend
+cd Frontend && npm run dev
+```
+
+Visit: `http://localhost:5173`
+
+## 📚 Documentation
+
+- [Quick Start Guide](QUICK_START.md) - Get started quickly
+- [MongoDB Setup](backend/MONGODB_SETUP.md) - Database setup guide
+- [Migration Guide](backend/MIGRATION_GUIDE.md) - PHP to Node.js migration
+- [Migration Summary](MIGRATION_SUMMARY.md) - Complete migration overview
+
+## 🧪 Testing
+
+### API Health Check
+```bash
+curl http://localhost:3000/
+```
+
+### MongoDB Check
+```bash
+mongosh
+use tour_planner
+db.stats()
+```
+
+## 🔒 Security Features
+
+- ✅ Password hashing with bcrypt
+- ✅ CORS protection
+- ✅ Environment variable configuration
+- ✅ Input validation & sanitization
+- ✅ Secure OTP generation
+- ✅ Auto-expiring password reset tokens
+
+## 📊 Database Schema
+
+### Collections:
+- **users** - User accounts and profiles
+- **bookings** - Travel bookings and reservations
+- **reviews** - User reviews and ratings
+- **queries** - Support queries and tickets
+- **passwordresets** - OTP tokens for password reset
+
+## 🌐 Deployment
+
+### MongoDB Atlas (Cloud Database)
+1. Create account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create cluster
+3. Get connection string
+4. Update `.env` with Atlas URI
+
+### Hosting Options
+- **Backend**: Heroku, AWS, Azure, DigitalOcean
+- **Frontend**: Vercel, Netlify, AWS S3
+- **Database**: MongoDB Atlas
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+## 📝 License
+
+This project is licensed under the ISC License.
+
+## 👨‍💻 Authors
+
+- **AryanCodeWizard** - [GitHub](https://github.com/AryanCodeWizard)
+
+## 🙏 Acknowledgments
+
+- MongoDB for the excellent database
+- Express.js for the web framework
+- React team for the amazing frontend library
+- All contributors and supporters
+
+## 📞 Support
+
+For issues and questions:
+- Open an issue on GitHub
+- Check documentation in `/docs` folder
+- Review troubleshooting in `QUICK_START.md`
+
+---
+
+**Built with ❤️ using Node.js, MongoDB, Express, and React**
+
+🌟 **Star this repo if you found it helpful!**
 
 <div align="center">
   <img src="./screenshots/banner.png" alt="Travel Planner Banner" width="800px">

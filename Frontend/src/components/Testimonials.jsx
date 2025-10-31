@@ -62,7 +62,7 @@ export default function Testimonials() {
   return (
     <section id="testimonials" className="py-20 bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
       <div className="text-center mb-12">
-        <h2 className="text-4xl font-extrabold text-white glow-text">Happy Customers</h2>
+        <h2 className="text-4xl font-extrabold text-white" style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.5)' }}>Happy Customers</h2>
         <p className="text-gray-300 mt-2 text-lg">See what our users have to say about us.</p>
       </div>
 
@@ -84,12 +84,6 @@ export default function Testimonials() {
           ))}
         </Slider>
       </div>
-
-      <style jsx>{`
-        .glow-text {
-          text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-      `}</style>
     </section>
   );
 }

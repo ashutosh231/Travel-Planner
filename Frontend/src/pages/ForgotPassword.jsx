@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/api";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      const response = await fetch("http://localhost/img/Travel-Planner/backend/forgot_password.php", {
+      const response = await fetch(API_ENDPOINTS.FORGOT_PASSWORD, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +47,7 @@ const ForgotPassword = () => {
 
       const data = await response.json();
       
-      if (response.ok && data.status === "success") {
+      if (response.ok && (data.success || data.status === "success")) {
         setMessage({ type: "success", text: "OTP sent to your email" });
         setStep(2);
       } else {
@@ -64,7 +65,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      const response = await fetch("http://localhost/img/Travel-Planner/backend/verify_otp.php", {
+      const response = await fetch(API_ENDPOINTS.VERIFY_OTP, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,8 +74,10 @@ const ForgotPassword = () => {
       });
 
       const data = await response.json();
+      console.log('Verify OTP Response:', data); // Debug log
       
-      if (response.ok && data.status === "success") {
+      if (response.ok && (data.success || data.status === "success")) {
+        console.log('Password received:', data.password); // Debug log
         setMessage({ type: "success", text: "OTP verified successfully. Your password is shown below." });
         setUserPassword(data.password); // Store the password returned from the server
         setStep(3); // Move to password display step

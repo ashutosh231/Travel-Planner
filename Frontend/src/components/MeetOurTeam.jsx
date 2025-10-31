@@ -2,12 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FaLinkedin, FaGithub, FaTwitter } from 'react-icons/fa';
 
-// Import or define your team member images
-// These should be placed in your assets folder
-import ashutoshImage from '/Applications/XAMPP/xamppfiles/htdocs/img/Travel-Planner/Frontend/src/assets/ashutosh.jpg';
-import amanImage from '/Applications/XAMPP/xamppfiles/htdocs/img/Travel-Planner/Frontend/src/assets/aman.jpg';
-import aryanImage from '/Applications/XAMPP/xamppfiles/htdocs/img/Travel-Planner/Frontend/src/assets/aryan.jpg';
-import yuvrajImage from '/Applications/XAMPP/xamppfiles/htdocs/img/Travel-Planner/Frontend/src/assets/yuvraj.jpg';
+// Import team member images
+import ashutoshImage from '../assets/ashutosh.jpg';
+import amanImage from '../assets/aman.jpg';
+import aryanImage from '../assets/aryan.jpg';
+import yuvrajImage from '../assets/yuvraj.jpg';
 
 const MeetOurTeam = () => {
   const teamMembers = [

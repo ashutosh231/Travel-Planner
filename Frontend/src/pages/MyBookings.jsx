@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/api";
 import { 
   FaTicketAlt,
   FaMapMarkerAlt, 
@@ -7,198 +8,73 @@ import {
   FaUserFriends,
   FaStar,
   FaCalendarAlt,
-  FaCreditCard,
-  FaDownload,
-  FaShareAlt,
-  FaCheckCircle,
-  FaUmbrellaBeach
+  FaCreditCard
 } from 'react-icons/fa';
 import { motion } from "framer-motion";
 
 export default function MyBookingsPage() {
   const navigate = useNavigate();
-  const [booking, setBooking] = useState({
-    destination: null,
-    accommodation: null,
-    numNights: 0,
-    totalCost: 0,
-    members: [],
-    selectedActivities: [],
-    bookingId: "",
-    bookingDate: "",
-    paymentMethod: "",
-    checkInDate: null,
-    checkOutDate: null,
-    userEmail: ""
-  });
+  const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [dbBooking, setDbBooking] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
+      return;
     }
     
-    // Get the user's email from localStorage
     const userEmail = localStorage.getItem("userEmail");
     if (!userEmail) {
-      // Redirect to login if email is not available
       navigate("/login");
+      return;
     }
+    
+    fetchUserBookings(userEmail);
   }, [navigate]);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    const userEmail = localStorage.getItem("userEmail");
-    
-    // First fetch the latest booking for this user from the database
-    const fetchUserBooking = async () => {
-      try {
-        const response = await fetch(`http://localhost/img/Travel-Planner/backend/get_user_bookings.php?email=${userEmail}`);
-        const data = await response.json();
-        
-        if (data.status === "success") {
-          setDbBooking(data.booking);
-          return data.booking.booking_id; // Return the booking ID for reference
-        } else {
-          console.log("No booking found in database or error:", data.message);
-          return null;
-        }
-      } catch (error) {
-        console.error("Error fetching booking:", error);
-        return null;
-      }
-    };
-    
-    const setupBookingData = async () => {
-      // Get all booking data from sessionStorage
-      const storedDestination = sessionStorage.getItem("selectedDestination");
-      const storedAccommodation = sessionStorage.getItem("selectedAccommodation");
-      const storedNights = sessionStorage.getItem("numNights");
-      const storedMembers = sessionStorage.getItem("members");
-      const storedTotalCost = sessionStorage.getItem("totalCost");
-      const storedCheckInDate = sessionStorage.getItem("checkInDate");
-      const storedCheckOutDate = sessionStorage.getItem("checkOutDate");
-      const paymentMethod = sessionStorage.getItem("paymentMethod") || "Credit Card";
-      const storedActivities = sessionStorage.getItem("selectedActivities");
-      
-      // Get booking ID from database or generate one if not available
-      const dbBookingId = await fetchUserBooking();
-      
-      // Format current date as booking date
-      const formatDate = (date) => {
-        return new Date(date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-      };
-
-      // Generate a booking ID only if we don't have one from the database
-      const generateBookingId = () => {
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        let id = "BK";
-        for (let i = 0; i < 8; i++) {
-          id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
-      };
-      
-      const bookingId = dbBookingId || sessionStorage.getItem("bookingId") || generateBookingId();
-      const bookingDate = formatDate(new Date());
-
-      // Set booking data
-      setBooking({
-        destination: storedDestination ? JSON.parse(storedDestination) : null,
-        accommodation: storedAccommodation ? JSON.parse(storedAccommodation) : null,
-        numNights: storedNights ? parseInt(storedNights, 10) : 3,
-        totalCost: storedTotalCost ? parseFloat(storedTotalCost) : 0,
-        members: storedMembers ? JSON.parse(storedMembers) : [],
-        selectedActivities: storedActivities ? JSON.parse(storedActivities) : [],
-        bookingId: bookingId,
-        bookingDate: bookingDate,
-        paymentMethod,
-        checkInDate: storedCheckInDate ? formatDate(JSON.parse(storedCheckInDate)) : formatDate(new Date()),
-        checkOutDate: storedCheckOutDate ? formatDate(JSON.parse(storedCheckOutDate)) : formatDate(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)),
-        userEmail: userEmail
-      });
-      
-      // Only save booking to database if we don't already have one and we have all required data
-      if (!dbBookingId && storedDestination && storedAccommodation && storedTotalCost) {
-        saveBookingToDatabase({
-          destination: JSON.parse(storedDestination).title,
-          accommodation: JSON.parse(storedAccommodation).title,
-          totalCost: parseFloat(storedTotalCost),
-          date: bookingDate,
-          status: "Confirmed",
-          email: userEmail,
-          bookingId: bookingId
-        });
-      }
-      
-      setIsLoading(false);
-    };
-    
-    setupBookingData();
-  }, []);
-  
-  // Function to save booking to database
-  const saveBookingToDatabase = async (bookingData) => {
+  const fetchUserBookings = async (email) => {
+    setIsLoading(true);
     try {
-      const response = await fetch('http://localhost/img/Travel-Planner/backend/save_booking.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData)
-      });
-      
+      const response = await fetch(`${API_ENDPOINTS.GET_USER_BOOKINGS}?email=${email}`);
       const data = await response.json();
-      console.log("Booking saved:", data);
+      
+      console.log('Bookings response:', data);
+      
+      if (Array.isArray(data)) {
+        setBookings(data);
+      } else if (data.status === "success" && data.bookings) {
+        setBookings(data.bookings);
+      } else if (data.status === "success" && data.booking) {
+        setBookings([data.booking]);
+      } else {
+        setBookings([]);
+      }
     } catch (error) {
-      console.error("Error saving booking:", error);
+      console.error("Error fetching bookings:", error);
+      setBookings([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
+  const getStatusColor = (status) => {
+    const statusColors = {
+      'confirmed': 'bg-green-500/20 text-green-300 border-green-500/30',
+      'pending': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+      'cancelled': 'bg-red-500/20 text-red-300 border-red-500/30',
+      'completed': 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+    };
+    return statusColors[status?.toLowerCase()] || statusColors['pending'];
   };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  const handleNewBooking = () => {
-    // Clear existing booking data
-    sessionStorage.removeItem("selectedDestination");
-    sessionStorage.removeItem("selectedAccommodation");
-    sessionStorage.removeItem("numNights");
-    sessionStorage.removeItem("members");
-    sessionStorage.removeItem("totalCost");
-    sessionStorage.removeItem("checkInDate");
-    sessionStorage.removeItem("checkOutDate");
-    sessionStorage.removeItem("paymentMethod");
-    sessionStorage.removeItem("selectedActivities");
-    
-    // Navigate to home or recommendation page
-    navigate("/recommend");
+  const getAdminStatusColor = (adminStatus) => {
+    const statusColors = {
+      'approved': 'bg-green-500/20 text-green-300',
+      'pending': 'bg-yellow-500/20 text-yellow-300',
+      'rejected': 'bg-red-500/20 text-red-300'
+    };
+    return statusColors[adminStatus?.toLowerCase()] || statusColors['pending'];
   };
 
   if (isLoading) {
@@ -206,404 +82,192 @@ export default function MyBookingsPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex justify-center items-center">
         <div className="flex flex-col items-center">
           <div className="w-16 h-16 border-4 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-purple-200 text-lg font-medium">Loading your booking...</p>
+          <p className="mt-4 text-purple-200 text-lg font-medium">Loading your bookings...</p>
         </div>
       </div>
     );
   }
 
-  // Calculate activities total cost
-  const activitiesTotalCost = booking.selectedActivities.reduce((sum, activity) => 
-    sum + parseFloat(activity.price || 0), 0);
+  if (bookings.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex justify-center items-center p-4">
+        <div className="text-center">
+          <div className="mb-6">
+            <FaTicketAlt className="text-6xl text-purple-400 mx-auto opacity-50" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">No Bookings Yet</h2>
+          <p className="text-gray-400 mb-6">Start planning your next adventure!</p>
+          <button
+            onClick={() => navigate("/recommend")}
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-medium hover:scale-105 transition-all"
+          >
+            Explore Destinations
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden p-4 md:p-8">
-      {/* Floating particles background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-white/5"
-            style={{
-              width: Math.random() * 10 + 5 + 'px',
-              height: Math.random() * 10 + 5 + 'px',
-              top: Math.random() * 100 + '%',
-              left: Math.random() * 100 + '%'
-            }}
-            animate={{
-              y: [0, (Math.random() - 0.5) * 100],
-              x: [0, (Math.random() - 0.5) * 50],
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Glowing blobs */}
+      {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-purple-600 rounded-full filter blur-[100px] opacity-20"></div>
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-indigo-600 rounded-full filter blur-[100px] opacity-20"></div>
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-pink-600 rounded-full filter blur-[100px] opacity-20"></div>
       </div>
 
-      <div className="relative z-10 flex justify-center items-center min-h-screen py-12">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-4xl"
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
         >
-          {/* Success message */}
-          <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-8 text-center"
-          >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
-              <FaCheckCircle className="text-green-400 text-3xl" />
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold mb-2 text-white">Booking Confirmed!</h1>
-            <p className="text-purple-200">Your vacation is booked and ready to enjoy.</p>
-          </motion.div>
+          <h1 className="text-4xl font-bold text-white mb-2">My Bookings</h1>
+          <p className="text-gray-400">Manage and view all your travel bookings ({bookings.length})</p>
+        </motion.div>
 
-          {/* Booking Ticket */}
-          <motion.div 
-            className="bg-gray-900/70 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/10 mb-8"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Ticket Header with decorative elements */}
-            <div className="relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10"></div>
-              <motion.div
-                variants={itemVariants}
-                className="text-center py-6 px-6 relative"
-              >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-30"></div>
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <FaTicketAlt className="text-purple-300 text-xl" />
-                  <h2 className="text-2xl font-bold text-purple-200">Booking Confirmation</h2>
+        {/* Bookings Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {bookings.map((booking, index) => (
+            <motion.div
+              key={booking._id || index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden hover:border-purple-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10"
+            >
+              {/* Booking Header */}
+              <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 p-4 border-b border-white/10">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <FaTicketAlt className="text-purple-300" />
+                      <span className="text-white font-mono font-bold">{booking.booking_id}</span>
+                    </div>
+                    <p className="text-sm text-gray-400">
+                      Booked on {new Date(booking.booking_date || booking.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1 items-end">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                      {booking.status || 'Pending'}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getAdminStatusColor(booking.admin_status)}`}>
+                      Admin: {booking.admin_status || 'Pending'}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-center gap-2 mt-1">
-                  <span className="text-sm font-medium text-purple-300">Reference:</span>
-                  <span className="text-lg font-bold text-white">{booking.bookingId}</span>
-                </div>
-              </motion.div>
-              
-              {/* Ticket divider with dotted line and circles */}
-              <div className="relative h-8 flex items-center">
-                <div className="absolute left-0 w-4 h-8 bg-gray-900 rounded-r-full"></div>
-                <div className="absolute right-0 w-4 h-8 bg-gray-900 rounded-l-full"></div>
-                <div className="border-t-2 border-dashed border-white/20 w-full"></div>
               </div>
-            </div>
 
-            <div className="p-6 md:p-8">
-              {/* Main Booking Details */}
-              <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-purple-900/50 rounded-lg border border-purple-500/30">
-                      <FaCalendarAlt className="text-purple-300" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-400">Booking Date</p>
-                      <p className="text-white font-medium">{booking.bookingDate}</p>
-                    </div>
+              {/* Booking Details */}
+              <div className="p-6 space-y-4">
+                {/* Destination */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-purple-900/30 rounded-lg">
+                    <FaMapMarkerAlt className="text-purple-400" />
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-purple-900/50 rounded-lg border border-purple-500/30">
-                      <FaCreditCard className="text-purple-300" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-400">Payment Method</p>
-                      <p className="text-white font-medium">{booking.paymentMethod}</p>
-                    </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Destination</p>
+                    <p className="text-lg font-semibold text-white">{booking.destination}</p>
                   </div>
                 </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-green-900/50 rounded-lg border border-green-500/30">
-                      <FaCalendarAlt className="text-green-300" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-400">Check-in</p>
-                      <p className="text-white font-medium">{booking.checkInDate}</p>
-                    </div>
+
+                {/* Accommodation */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-pink-900/30 rounded-lg">
+                    <FaHotel className="text-pink-400" />
                   </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-red-900/50 rounded-lg border border-red-500/30">
-                      <FaCalendarAlt className="text-red-300" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-400">Check-out</p>
-                      <p className="text-white font-medium">{booking.checkOutDate}</p>
-                    </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Accommodation</p>
+                    <p className="text-lg font-semibold text-white">{booking.accommodation}</p>
                   </div>
                 </div>
-              </motion.div>
 
-              {/* Destination Section */}
-              {booking.destination && (
-                <motion.div
-                  variants={itemVariants}
-                  className="p-6 bg-gray-800/40 rounded-xl border border-white/10 relative overflow-hidden mb-6"
-                >
-                  <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-500/10 rounded-full filter blur-2xl"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="text-xl font-bold flex items-center gap-3 text-purple-200">
-                        <div className="p-2 bg-purple-900/50 rounded-lg border border-purple-500/30">
-                          <FaMapMarkerAlt className="text-purple-300" />
-                        </div>
-                        <span>Destination</span>
-                      </h3>
-                      <div className="flex items-center gap-1 text-amber-400">
-                        <FaStar className="text-sm" />
-                        <span className="text-sm font-medium">4.8</span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="md:col-span-2">
-                        <p className="text-2xl font-bold text-white mb-1">{booking.destination.title}</p>
-                        <p className="text-sm text-purple-300 font-medium mb-4">{booking.destination.location}</p>
-                        <p className="text-gray-300 text-sm leading-relaxed">{booking.destination.description}</p>
-                      </div>
-                      <div className="relative h-40 rounded-xl overflow-hidden border-2 border-white/10 shadow-lg">
-                        <img 
-                          src={booking.destination.image} 
-                          alt={booking.destination.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                      </div>
-                    </div>
+                {/* Cost */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-green-900/30 rounded-lg">
+                    <FaCreditCard className="text-green-400" />
                   </div>
-                </motion.div>
-              )}
-
-              {/* Accommodation Section */}
-              {booking.accommodation && (
-                <motion.div
-                  variants={itemVariants}
-                  className="p-6 bg-gray-800/40 rounded-xl border border-white/10 relative overflow-hidden mb-6"
-                >
-                  <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-pink-500/10 rounded-full filter blur-2xl"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="text-xl font-bold flex items-center gap-3 text-pink-200">
-                        <div className="p-2 bg-pink-900/50 rounded-lg border border-pink-500/30">
-                          <FaHotel className="text-pink-300" />
-                        </div>
-                        <span>Accommodation</span>
-                      </h3>
-                      <div className="flex items-center gap-1 text-amber-400">
-                        <FaStar className="text-sm" />
-                        <span className="text-sm font-medium">{booking.accommodation.rating || '4.5'}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="md:col-span-2">
-                        <p className="text-2xl font-bold text-white mb-1">{booking.accommodation.title}</p>
-                        <p className="text-sm text-pink-300 font-medium mb-2">{booking.accommodation.location}</p>
-                        
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div className="bg-gray-900/50 p-3 rounded-lg border border-white/5">
-                            <p className="text-xs text-gray-400 mb-1">Per Night</p>
-                            <p className="text-lg font-bold text-purple-300">Rs. {Number(booking.accommodation.cost)}</p>
-                          </div>
-                          <div className="bg-gray-900/50 p-3 rounded-lg border border-white/5">
-                            <p className="text-xs text-gray-400 mb-1">Total Nights</p>
-                            <p className="text-lg font-bold text-pink-300">{booking.numNights}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="relative h-40 rounded-xl overflow-hidden border-2 border-white/10 shadow-lg">
-                        <img 
-                          src={booking.accommodation.image} 
-                          alt={booking.accommodation.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                      </div>
-                    </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Total Cost</p>
+                    <p className="text-2xl font-bold text-green-400">₹{booking.total_cost?.toLocaleString()}</p>
                   </div>
-                </motion.div>
-              )}
-
-              {/* Activities Section */}
-              {booking.selectedActivities && booking.selectedActivities.length > 0 && (
-                <motion.div
-                  variants={itemVariants}
-                  className="p-6 bg-gray-800/40 rounded-xl border border-white/10 relative overflow-hidden mb-6"
-                >
-                  <div className="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full filter blur-2xl"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="text-xl font-bold flex items-center gap-3 text-indigo-200">
-                        <div className="p-2 bg-indigo-900/50 rounded-lg border border-indigo-500/30">
-                          <FaUmbrellaBeach className="text-indigo-300" />
-                        </div>
-                        <span>Selected Activities</span>
-                      </h3>
-                      <div className="px-3 py-1 bg-indigo-900/30 rounded-lg border border-indigo-500/30">
-                        <span className="text-indigo-200 font-medium">
-                          Rs. {activitiesTotalCost}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 gap-3 mt-2">
-                      {booking.selectedActivities.map((activity, index) => (
-                        <div key={index} className="bg-gray-900/40 rounded-lg p-4 border border-white/10">
-                          <div className="flex gap-3">
-                            <img 
-                              src={activity.imageUrl} 
-                              alt={activity.title}
-                              className="w-16 h-16 object-cover rounded-lg flex-shrink-0" 
-                            />
-                            <div className="flex-1">
-                              <h4 className="font-medium text-white">{activity.title}</h4>
-                              <div className="flex items-center justify-between mt-1">
-                                <div className="flex items-center gap-1 text-xs text-gray-400">
-                                  <FaMapMarkerAlt className="text-indigo-400" />
-                                  <span>{activity.location}</span>
-                                </div>
-                                <span className="text-sm font-medium text-indigo-300">Rs. {activity.price}</span>
-                              </div>
-                              <div className="text-xs text-gray-400 mt-1">
-                                Duration: {activity.duration}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Group Members Section */}
-              {booking.members.length > 0 && (
-                <motion.div
-                  variants={itemVariants}
-                  className="p-6 bg-gray-800/40 rounded-xl border border-white/10 relative overflow-hidden mb-6"
-                >
-                  <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/10 rounded-full filter blur-2xl"></div>
-                  <div className="relative z-10">
-                    <h3 className="text-xl font-bold flex items-center gap-3 text-blue-200 mb-5">
-                      <div className="p-2 bg-blue-900/50 rounded-lg border border-blue-500/30">
-                        <FaUserFriends className="text-blue-300" />
-                      </div>
-                      <span>Group Members ({booking.members.length})</span>
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {booking.members.map((member, index) => (
-                        <div key={index} className="bg-gray-900/50 p-4 rounded-lg border border-white/10">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium text-white">Member {index + 1}</p>
-                              <p className="text-sm text-blue-300 mt-1">{member.name || 'Not specified'}</p>
-                            </div>
-                            <span className="text-xs bg-blue-900/30 px-2 py-1 rounded-full text-blue-200">
-                              {member.age ? `${member.age} yrs` : 'Age not specified'}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Total Cost Section */}
-              <motion.div
-                variants={itemVariants}
-                className="p-6 bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-xl border border-white/10 relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5"></div>
-                <div className="relative z-10">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-white">Total Payment</h3>
-                    <p className="text-2xl font-bold text-green-400">Rs. {booking.totalCost}</p>
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                    <div className="text-gray-400">Destination:</div>
-                    <div className="text-right text-white">Rs. {Number(booking.destination?.cost ?? 0)}</div>
-                    
-                    <div className="text-gray-400">Accommodation ({booking.numNights} nights):</div>
-                    <div className="text-right text-white">Rs. {Number(booking.accommodation?.cost ?? 0) * booking.numNights}</div>
-                    
-                    {activitiesTotalCost > 0 && (
-                      <>
-                        <div className="text-gray-400">Activities:</div>
-                        <div className="text-right text-white">Rs. {activitiesTotalCost}</div>
-                      </>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-400 mt-3 flex items-center gap-2">
-                    <FaCheckCircle className="text-green-400" />
-                    Payment completed successfully
-                  </p>
                 </div>
-              </motion.div>
-            </div>
-          </motion.div>
 
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+                {/* Booked By */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-900/30 rounded-lg">
+                    <FaUserFriends className="text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Booked By</p>
+                    <p className="text-white font-medium">{booking.booked_by}</p>
+                  </div>
+                </div>
+
+                {/* Booking Date */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-indigo-900/30 rounded-lg">
+                    <FaCalendarAlt className="text-indigo-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-400">Travel Date</p>
+                    <p className="text-white font-medium">
+                      {new Date(booking.booking_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="p-4 bg-gray-900/30 border-t border-white/10 flex gap-2">
+                {booking.admin_status === 'approved' && (
+                  <button
+                    onClick={() => navigate(`/reviews`)}
+                    className="flex-1 py-2 px-4 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/30 rounded-lg text-yellow-300 font-medium transition-all flex items-center justify-center gap-2"
+                  >
+                    <FaStar className="text-sm" />
+                    Leave Review
+                  </button>
+                )}
+                {booking.admin_status === 'pending' && (
+                  <div className="flex-1 py-2 px-4 bg-yellow-900/20 border border-yellow-500/20 rounded-lg text-yellow-400 text-center text-sm">
+                    Waiting for admin approval
+                  </div>
+                )}
+                {booking.admin_status === 'rejected' && (
+                  <div className="flex-1 py-2 px-4 bg-red-900/20 border border-red-500/20 rounded-lg text-red-400 text-center text-sm">
+                    Booking rejected
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* New Booking Button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 text-center"
+        >
+          <button
+            onClick={() => navigate("/recommend")}
+            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl font-bold text-lg transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:scale-105"
           >
-            <button
-              className="flex-1 py-3 px-6 bg-gray-800/50 hover:bg-gray-800/70 border border-white/10 rounded-xl transition duration-300 flex items-center justify-center gap-2"
-              onClick={() => window.print()}
-            >
-              <FaDownload className="text-purple-300" />
-              <span>Download Ticket</span>
-            </button>
-            
-            <button
-              className="flex-1 py-3 px-6 bg-gray-800/50 hover:bg-gray-800/70 border border-white/10 rounded-xl transition duration-300 flex items-center justify-center gap-2"
-              onClick={() => {
-                // Share functionality would go here
-                alert("Sharing functionality would be implemented here");
-              }}
-            >
-              <FaShareAlt className="text-blue-300" />
-              <span>Share Itinerary</span>
-            </button>
-            
-            <button
-              className="flex-1 py-3 px-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl font-medium transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 flex items-center justify-center gap-2"
-              onClick={handleNewBooking}
-            >
-              <FaTicketAlt className="text-white" />
-              <span className="font-medium">New Booking</span>
-            </button>
-            <button
-              className="flex-1 py-3 px-6 bg-gray-800/50 hover:bg-gray-800/70 border border-white/10 rounded-xl transition duration-300 flex items-center justify-center gap-2"
-              onClick={() => {
-                navigate("/reviews");
-              }}
-            >
-              <span>Add Ratings and Reviews</span>
-            </button>
-          </motion.div>
+            <FaTicketAlt className="inline mr-2" />
+            Plan New Trip
+          </button>
         </motion.div>
       </div>
     </div>

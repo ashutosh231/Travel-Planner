@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../App";
+import { API_ENDPOINTS } from "../config/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const Login = () => {
   const handleLogin = async () => {
     setErrorMessage(""); // Clear previous errors
     try {
-      const response = await fetch("http://localhost/img/Travel-Planner/backend/login.php", {
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

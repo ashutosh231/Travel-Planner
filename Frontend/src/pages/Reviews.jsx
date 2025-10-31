@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaStar, FaHistory, FaPaperPlane, FaMapMarkerAlt, FaHotel, FaCalendarAlt } from "react-icons/fa";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function Reviews() {
   const navigate = useNavigate();
@@ -55,10 +56,10 @@ export default function Reviews() {
   const fetchPastBookings = async (email) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost/img/Travel-Planner/backend/get_user_bookings_for_review.php?email=${email}`);
+      const response = await fetch(`${API_ENDPOINTS.GET_BOOKINGS_FOR_REVIEW}?email=${email}`);
       const data = await response.json();
       
-      if (data.status === "success") {
+      if (data.success || data.status === "success") {
         // Make sure any image URLs are never empty strings
         const processedBookings = data.bookings.map(booking => ({
           ...booking,
@@ -118,14 +119,14 @@ export default function Reviews() {
     const userEmail = localStorage.getItem("userEmail");
     
     try {
-      const response = await fetch("http://localhost/img/Travel-Planner/backend/submit_review.php", {
+      const response = await fetch(API_ENDPOINTS.SUBMIT_REVIEW, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           booking_id: selectedBooking.booking_id,
-          email: userEmail,
+          user_email: userEmail,
           rating: rating,
           review_text: reviewText,
           destination: selectedBooking.destination,
@@ -135,8 +136,8 @@ export default function Reviews() {
       
       const data = await response.json();
       
-      if (data.status === "success") {
-        setNotification({ type: "success", message: data.message });
+      if (data.success || data.status === "success") {
+        setNotification({ type: "success", message: data.message || "Review submitted successfully" });
         
         // Update the booking in pastBookings to show it has a review
         setPastBookings(pastBookings.map(booking => 

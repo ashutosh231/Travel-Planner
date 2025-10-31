@@ -2,6 +2,7 @@ import axios from "axios"; // Import axios for API calls
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FaCreditCard, FaGooglePay, FaApplePay, FaQrcode, FaUniversity } from "react-icons/fa";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function FakePaymentPage() {
   const navigate = useNavigate();
@@ -65,39 +66,20 @@ export default function FakePaymentPage() {
     try {
       // Step 1: Save booking to database
       const saveResponse = await axios.post(
-        "http://localhost/img/Travel-Planner/backend/save_booking.php",
+        API_ENDPOINTS.SAVE_BOOKING,
         bookingDetails
       );
 
       console.log("Booking saved:", saveResponse.data);
 
       if (saveResponse.data.status === "success") {
-        // Step 2: Send confirmation email
-        const emailData = {
-          email: userEmail,
-          bookingId: bookingId,
-          destination: destination.title,
-          accommodation: accommodation.title,
-          totalCost: totalCost,
-          checkIn: bookingDates.checkIn,
-          checkOut: bookingDates.checkOut
-        };
-
-        try {
-          const emailResponse = await axios.post(
-            "http://localhost/img/Travel-Planner/backend/send_booking_confirmation.php",
-            emailData
-          );
-
-          console.log("Email confirmation sent:", emailResponse.data);
-        } catch (emailError) {
-          console.error("Error sending confirmation email:", emailError);
-        }
+        // Email confirmation is handled by the backend automatically
+        console.log("Booking saved successfully:", saveResponse.data);
         
         // Save bookingId to sessionStorage for reference on success page
         sessionStorage.setItem("bookingId", bookingId);
         
-        // Navigate to success page regardless of email success
+        // Navigate to success page
         navigate("/success");
       } else {
         console.error("Error saving booking:", saveResponse.data.message);

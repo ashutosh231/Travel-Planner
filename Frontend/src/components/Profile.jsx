@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { BsCloudMoon, BsCloudSun, BsSun } from "react-icons/bs";
 import { FaMapMarkedAlt, FaPlane, FaGlobeAmericas, FaPassport, FaCompass } from "react-icons/fa";
+import { API_ENDPOINTS } from "../config/api";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -133,7 +134,7 @@ const Profile = () => {
           throw new Error("User not logged in");
         }
         
-        const response = await fetch(`http://localhost/img/Travel-Planner/backend/get_user_data.php?email=${email}`);
+        const response = await fetch(`${API_ENDPOINTS.GET_USER_DATA}?email=${email}`);
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
         }
@@ -142,6 +143,18 @@ const Profile = () => {
           throw new Error(data.error);
         }
         setUserData(data);
+        
+        // Load profile photo from database if available
+        if (data.profile_photo) {
+          setProfileImage(data.profile_photo);
+          localStorage.setItem("profileImage", data.profile_photo);
+        } else {
+          // Fallback to localStorage if no photo in database
+          const savedImage = localStorage.getItem("profileImage");
+          if (savedImage) {
+            setProfileImage(savedImage);
+          }
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
         setError(error.message || "Unable to fetch user data.");
@@ -183,18 +196,51 @@ const Profile = () => {
     setSuggestions([]);
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        setError("Image size should be less than 2MB");
+        return;
+      }
+
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-        localStorage.setItem("profileImage", reader.result);
+      reader.onloadend = async () => {
+        const base64Image = reader.result;
+        setProfileImage(base64Image);
+        
+        // Save to localStorage immediately for instant feedback
+        localStorage.setItem("profileImage", base64Image);
         if (userData.name) {
           localStorage.setItem("userName", userData.name);
         }
 
-        window.dispatchEvent(new Event('profileImageUpdated'));
+        // Save to database
+        try {
+          const email = localStorage.getItem("userEmail");
+          const response = await fetch(API_ENDPOINTS.UPDATE_USER, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: email,
+              profile_photo: base64Image
+            }),
+          });
+
+          const data = await response.json();
+          if (response.ok && (data.success || data.message)) {
+            setMessage("Profile photo updated successfully!");
+            window.dispatchEvent(new Event('profileImageUpdated'));
+            setTimeout(() => setMessage(""), 3000);
+          } else {
+            throw new Error(data.message || "Failed to update profile photo");
+          }
+        } catch (err) {
+          console.error("Error saving profile photo:", err);
+          setError("Profile photo saved locally but failed to sync to server");
+          setTimeout(() => setError(""), 5000);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -208,7 +254,7 @@ const Profile = () => {
     setIsSaving(true);
 
     try {
-      const response = await fetch("http://localhost/Travel-Planner/backend/update_user.php", {
+      const response = await fetch(API_ENDPOINTS.UPDATE_USER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),

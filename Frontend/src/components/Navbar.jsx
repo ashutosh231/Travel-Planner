@@ -23,7 +23,9 @@ export default function Navbar() {
     const storedName = localStorage.getItem("userName");
 
     setIsLoggedIn(!!token);
-    setProfileImage(storedImage || "https://cdn.vectorstock.com/i/1000v/92/16/default-profile-picture-avatar-user-icon-vector-46389216.jpg");
+    // Only use storedImage if it's not empty, otherwise use default
+    const defaultImage = "https://cdn.vectorstock.com/i/1000v/92/16/default-profile-picture-avatar-user-icon-vector-46389216.jpg";
+    setProfileImage((storedImage && storedImage.trim() !== "") ? storedImage : defaultImage);
 
     if (storedName) {
       const nameParts = storedName.split(" ");
@@ -191,14 +193,25 @@ export default function Navbar() {
 
           {isLoggedIn ? (
             <div className="relative">
-              <img
-                src={profileImage}
-                alt="Profile"
-                className="w-10 h-10 rounded-full cursor-pointer border-2 border-white hover:shadow-md transition duration-300"
-                onClick={() =>
-                  setProfileDropdownOpen(!profileDropdownOpen)
-                }
-              />
+              {profileImage && profileImage.trim() !== "" ? (
+                <img
+                  src={profileImage}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full cursor-pointer border-2 border-white hover:shadow-md transition duration-300"
+                  onClick={() =>
+                    setProfileDropdownOpen(!profileDropdownOpen)
+                  }
+                />
+              ) : (
+                <div 
+                  className="w-10 h-10 rounded-full cursor-pointer border-2 border-white hover:shadow-md transition duration-300 bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold"
+                  onClick={() =>
+                    setProfileDropdownOpen(!profileDropdownOpen)
+                  }
+                >
+                  {userInitials || "U"}
+                </div>
+              )}
               {/* Profile Dropdown */}
               {profileDropdownOpen && (
                 <motion.ul 

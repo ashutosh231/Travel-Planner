@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { API_ENDPOINTS } from "../config/api";
 import {
   FaChartLine,
   FaUsers,
@@ -92,18 +93,19 @@ export default function AdminDashboard() {
   const fetchBookings = async (email) => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`http://localhost/img/Travel-Planner/backend/admin_get_bookings.php?email=${email}`);
+      const response = await axios.get(API_ENDPOINTS.GET_ALL_BOOKINGS);
       
-      if (response.data.status === "success") {
-        setBookings(response.data.bookings || []);
-        calculateStats(response.data.bookings || []);
+      if (response.data && (response.data.status === "success" || Array.isArray(response.data.bookings))) {
+        const bookingsData = response.data.bookings || response.data || [];
+        setBookings(bookingsData);
+        calculateStats(bookingsData);
       } else {
-        alert("Failed to fetch bookings: " + response.data.message);
+        console.error("Failed to fetch bookings:", response.data?.message);
         setBookings([]);
         calculateStats([]);
       }
     } catch (error) {
-      alert("Error connecting to server. Please check your connection or try again later.");
+      console.error("Error fetching bookings:", error);
       setBookings([]);
       calculateStats([]);
     } finally {
@@ -131,10 +133,9 @@ export default function AdminDashboard() {
 
   const updateBookingStatus = async (bookingId, status) => {
     try {
-      const response = await axios.post("http://localhost/img/Travel-Planner/backend/admin_update_booking.php", {
-        adminEmail: adminEmail,
-        bookingId: bookingId,
-        status: status
+      const response = await axios.post(API_ENDPOINTS.UPDATE_BOOKING, {
+        id: bookingId,
+        admin_status: status
       });
       
       if (response.data.status === "success") {
@@ -143,6 +144,8 @@ export default function AdminDashboard() {
             ? { ...booking, admin_status: status }
             : booking
         ));
+      } else {
+        console.error("Failed to update booking:", response.data.message);
       }
     } catch (error) {
       console.error("API call failed:", error);
@@ -153,9 +156,7 @@ export default function AdminDashboard() {
     if (!window.confirm("Are you sure you want to delete this booking?")) return;
 
     try {
-      const response = await axios.post("http://localhost/img/Travel-Planner/backend/admin_delete_booking.php", {
-        bookingId,
-      });
+      const response = await axios.delete(API_ENDPOINTS.DELETE_BOOKING(bookingId));
       if (response.data.status === "success") {
         alert("Booking deleted successfully!");
         setBookings(bookings.filter((booking) => booking.booking_id !== bookingId));
@@ -169,48 +170,64 @@ export default function AdminDashboard() {
 
   const fetchUsers = async (query = "") => {
     try {
-      const response = await axios.get(`http://localhost/img/Travel-Planner/backend/admin_get_users.php?search=${query}`);
-      if (response.data && Array.isArray(response.data)) {
-        setUsers(response.data);
+      const response = await axios.get(`${API_ENDPOINTS.GET_ALL_USERS}?search=${query}`);
+      if (response.data) {
+        if (response.data.status === "success" && response.data.users) {
+          setUsers(response.data.users);
+        } else if (Array.isArray(response.data)) {
+          setUsers(response.data);
+        } else {
+          setUsers([]);
+        }
       } else {
         setUsers([]);
       }
     } catch (error) {
+      console.error("Error fetching users:", error);
       setUsers([]);
     }
   };
 
   const fetchRecentActivities = async () => {
     try {
-      const response = await axios.get("http://localhost/img/Travel-Planner/backend/get_recent_activities.php");
-      if (response.data.status === "success") {
-        setRecentActivities(response.data.activities);
+      const response = await axios.get(API_ENDPOINTS.GET_RECENT_ACTIVITIES);
+      if (response.data && (response.data.success || response.data.status === "success")) {
+        setRecentActivities(response.data.activities || []);
+      } else if (Array.isArray(response.data)) {
+        // Handle direct array response
+        setRecentActivities(response.data);
       } else {
         setRecentActivities([]);
       }
     } catch (error) {
+      console.error("Error fetching recent activities:", error);
       setRecentActivities([]);
     }
   };
 
   const fetchTopDestinations = async () => {
     try {
-      const response = await axios.get("http://localhost/img/Travel-Planner/backend/get_top_destinations.php");
-      if (response.data.status === "success") {
-        setTopDestinations(response.data.destinations);
+      const response = await axios.get(API_ENDPOINTS.GET_TOP_DESTINATIONS);
+      if (response.data && (response.data.success || response.data.status === "success")) {
+        setTopDestinations(response.data.destinations || []);
+      } else if (Array.isArray(response.data)) {
+        setTopDestinations(response.data);
       } else {
         setTopDestinations([]);
       }
     } catch (error) {
+      console.error("Error fetching top destinations:", error);
       setTopDestinations([]);
     }
   };
 
   const fetchTopRatedDestinations = async () => {
     try {
-      const response = await axios.get("http://localhost/img/Travel-Planner/backend/get_top_rated_destinations.php");
-      if (response.data.status === "success") {
-        setTopRatedDestinations(response.data.destinations);
+      const response = await axios.get(API_ENDPOINTS.GET_TOP_RATED_DESTINATIONS);
+      if (response.data && (response.data.success || response.data.status === "success")) {
+        setTopRatedDestinations(response.data.destinations || []);
+      } else if (Array.isArray(response.data)) {
+        setTopRatedDestinations(response.data);
       } else {
         setTopRatedDestinations([]);
       }
@@ -223,7 +240,7 @@ export default function AdminDashboard() {
   const fetchReviews = async (filters = {}) => {
     setReviewsLoading(true);
     try {
-      let url = "http://localhost/img/Travel-Planner/backend/get_all_reviews.php";
+      let url = API_ENDPOINTS.GET_ALL_REVIEWS;
       
       const params = new URLSearchParams();
       if (filters.destination) params.append("destination", filters.destination);
@@ -231,10 +248,10 @@ export default function AdminDashboard() {
       if (params.toString()) url += "?" + params.toString();
       
       const response = await axios.get(url);
-      if (response.data.status === "success") {
+      if (response.data && (response.data.success || response.data.status === "success")) {
         setReviews(response.data.reviews || []);
       } else {
-        console.error("Failed to fetch reviews:", response.data.message);
+        console.error("Failed to fetch reviews:", response.data?.message);
         setReviews([]);
       }
     } catch (error) {
@@ -260,17 +277,18 @@ export default function AdminDashboard() {
 
   const editUser = async (userId, updatedData) => {
     try {
-      const response = await axios.post("http://localhost/img/Travel-Planner/backend/admin_edit_user.php", {
-        userId,
+      const response = await axios.post(API_ENDPOINTS.EDIT_USER, {
+        id: userId,
         ...updatedData,
       });
       if (response.data.status === "success") {
         alert("User updated successfully!");
         fetchUsers();
       } else {
-        alert("Failed to update user: " + response.data.message);
+        alert("Failed to update user: " + (response.data.message || "Unknown error"));
       }
     } catch (error) {
+      console.error("Error updating user:", error);
       alert("An error occurred while updating the user.");
     }
   };
@@ -279,16 +297,15 @@ export default function AdminDashboard() {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      const response = await axios.post("http://localhost/img/Travel-Planner/backend/admin_delete_user.php", {
-        userId,
-      });
+      const response = await axios.delete(API_ENDPOINTS.DELETE_USER(userId));
       if (response.data.status === "success") {
         alert("User deleted successfully!");
         fetchUsers();
       } else {
-        alert("Failed to delete user: " + response.data.message);
+        alert("Failed to delete user: " + (response.data.message || "Unknown error"));
       }
     } catch (error) {
+      console.error("Error deleting user:", error);
       alert("An error occurred while deleting the user.");
     }
   };
@@ -458,22 +475,30 @@ export default function AdminDashboard() {
                       >
                         <div className="flex items-start">
                           <div className="p-2 rounded-lg bg-gray-900 mr-3">
-                            {activity.type === "booking" && <FaCalendarAlt className="text-blue-400" />}
-                            {activity.type === "query" && <FaClipboardList className="text-purple-400" />}
-                            {activity.type === "admin" && <FaUserEdit className="text-orange-400" />}
+                            <FaCalendarAlt className="text-blue-400" />
                           </div>
                           <div className="flex-1">
                             <div className="flex justify-between">
                               <span className="font-medium text-white">
-                                {activity.type === "query" || activity.type === "admin" ? activity.email : activity.user}
+                                {activity.booked_by || activity.user || 'User'}
                               </span>
-                              <span className="text-gray-400 text-xs">{new Date(activity.time).toLocaleString()}</span>
+                              <span className="text-gray-400 text-xs">
+                                {new Date(activity.createdAt || activity.created_at || activity.time).toLocaleString()}
+                              </span>
                             </div>
                             <p className="text-gray-300 text-sm">
-                              {activity.type === "booking" && `made a booking for ${activity.detail}`}
-                              {activity.type === "query" && `submitted a query: ${activity.detail}`}
-                              {activity.type === "admin" && `You answered ${activity.email}'s query: ${activity.detail}`}
+                              Booked {activity.destination} • {activity.accommodation}
                             </p>
+                            <p className="text-green-400 text-sm font-medium mt-1">
+                              ₹{activity.total_cost?.toLocaleString()}
+                            </p>
+                            <span className={`inline-block px-2 py-1 rounded text-xs mt-2 ${
+                              activity.admin_status === 'approved' ? 'bg-green-500/20 text-green-300' :
+                              activity.admin_status === 'rejected' ? 'bg-red-500/20 text-red-300' :
+                              'bg-yellow-500/20 text-yellow-300'
+                            }`}>
+                              {activity.admin_status || 'pending'}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -492,23 +517,20 @@ export default function AdminDashboard() {
                 </h3>
                 <div className="space-y-4">
                   {topDestinations.length > 0 ? (
-                    topDestinations.map((destination, index) => (
+                    topDestinations.map((dest, index) => (
                       <div
                         key={index}
                         className="bg-gray-700/50 rounded-lg p-3 border border-gray-700 hover:shadow-md transition-shadow duration-300"
                       >
                         <div className="flex justify-between items-center">
-                          <span className="font-medium text-white">{destination.name}</span>
-                          <span className="text-gray-300 text-sm">{destination.bookings} bookings</span>
+                          <span className="font-medium text-white">{dest.destination || dest.name}</span>
+                          <span className="text-gray-300 text-sm">{dest.booking_count || dest.bookings || 0} bookings</span>
                         </div>
                         <div className="mt-2 w-full bg-gray-600 rounded-full h-2">
                           <div
                             className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
-                            style={{ width: `${(destination.bookings / 30) * 100}%` }}
+                            style={{ width: `${Math.min(((dest.booking_count || dest.bookings || 0) / 30) * 100, 100)}%` }}
                           ></div>
-                        </div>
-                        <div className="mt-1 text-right text-sm text-green-400">
-                          ₹{destination.revenue.toLocaleString()} revenue
                         </div>
                       </div>
                     ))
@@ -528,7 +550,7 @@ export default function AdminDashboard() {
               <div className="bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl rounded-xl p-6">
                 {topRatedDestinations.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {topRatedDestinations.map((destination, index) => (
+                    {topRatedDestinations.map((dest, index) => (
                       <div
                         key={index}
                         className="bg-gray-700/50 rounded-lg p-3 border border-gray-700 hover:shadow-md transition-shadow duration-300"
@@ -539,19 +561,17 @@ export default function AdminDashboard() {
                           </div>
                           <div className="flex-1">
                             <div className="flex justify-between">
-                              <span className="font-medium text-white">{destination.name}</span>
+                              <span className="font-medium text-white">{dest.destination || dest.name}</span>
                               <div className="flex items-center bg-yellow-900/30 px-2 py-1 rounded-lg">
                                 <FaStar className="text-yellow-400 mr-1" />
-                                <span className="text-yellow-200">{destination.average_rating}/5</span>
+                                <span className="text-yellow-200">
+                                  {(dest.avg_rating || dest.average_rating || 0).toFixed(1)}/5
+                                </span>
                               </div>
                             </div>
                             <p className="text-gray-300 text-sm mt-1">
-                              {destination.reviewCount} reviews • {destination.bookingCount} bookings
+                              {dest.review_count || dest.reviewCount || 0} reviews
                             </p>
-                            <div className="flex justify-between mt-2">
-                              <span className="text-green-400 text-sm">₹{parseInt(destination.avgCost).toLocaleString()} avg</span>
-                              <span className="text-blue-300 text-sm">{destination.popular_accommodation || 'Various'}</span>
-                            </div>
                           </div>
                         </div>
                       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaQuestionCircle, FaReply, FaClock, FaCheckCircle } from "react-icons/fa";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function UserQueries() {
   const navigate = useNavigate();
@@ -33,17 +34,19 @@ export default function UserQueries() {
   const fetchQueries = async (email) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost/img/Travel-Planner/backend/get_user_queries.php?email=${email}`);
+      const response = await fetch(`${API_ENDPOINTS.GET_USER_QUERIES}?email=${email}`);
       const data = await response.json();
       
-      if (data.status === "success") {
-        setQueries(data.queries);
+      if (data.success || data.status === "success") {
+        setQueries(data.queries || []);
       } else {
         console.error("Error fetching queries:", data.message);
+        setQueries([]);
       }
     } catch (error) {
       console.error("Error fetching queries:", error);
       setNotification({ type: "error", message: "Failed to load your queries. Please try again." });
+      setQueries([]);
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +62,7 @@ export default function UserQueries() {
     
     setIsSubmitting(true);
     try {
-      const response = await fetch("http://localhost/img/Travel-Planner/backend/submit_query.php", {
+      const response = await fetch(API_ENDPOINTS.SUBMIT_QUERY, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,15 +77,15 @@ export default function UserQueries() {
       
       const data = await response.json();
       
-      if (data.status === "success") {
-        setNotification({ type: "success", message: data.message });
+      if (data.success || data.status === "success") {
+        setNotification({ type: "success", message: data.message || "Query submitted successfully" });
         setSubject("");
         setMessage("");
         // Refetch queries to show the new one
         fetchQueries(userEmail);
         setActiveTab("history");
       } else {
-        setNotification({ type: "error", message: data.message });
+        setNotification({ type: "error", message: data.message || "Failed to submit query" });
       }
     } catch (error) {
       console.error("Error submitting query:", error);

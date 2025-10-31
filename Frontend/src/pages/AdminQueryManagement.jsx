@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserContext } from "../App";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function AdminQueryManagement() {
   const navigate = useNavigate();
@@ -27,18 +28,21 @@ export default function AdminQueryManagement() {
     setIsLoading(true);
     try {
       const url = filter === "all" 
-        ? "http://localhost/img/Travel-Planner/backend/get_all_queries.php" 
-        : `http://localhost/img/Travel-Planner/backend/get_all_queries.php?status=${filter}`;
+        ? API_ENDPOINTS.GET_ALL_QUERIES 
+        : `${API_ENDPOINTS.GET_ALL_QUERIES}?status=${filter}`;
       
       const response = await fetch(url);
       const data = await response.json();
       
-      if (data.status === "success") {
-        setQueries(data.queries);
+      if (data.success || data.status === "success") {
+        setQueries(data.queries || []);
+      } else {
+        setQueries([]);
       }
     } catch (error) {
       console.error("Error fetching queries:", error);
       setNotification({ type: "error", message: "Failed to load queries" });
+      setQueries([]);
     } finally {
       setIsLoading(false);
     }
@@ -52,27 +56,27 @@ export default function AdminQueryManagement() {
     
     setIsSending(true);
     try {
-      const response = await fetch("http://localhost/img/Travel-Planner/backend/reply_to_query.php", {
+      const response = await fetch(API_ENDPOINTS.REPLY_TO_QUERY, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: activeQuery.id,
+          queryId: activeQuery.id || activeQuery._id,
           reply,
         }),
       });
       
       const data = await response.json();
       
-      if (data.status === "success") {
-        setNotification({ type: "success", message: data.message });
+      if (data.success || data.status === "success") {
+        setNotification({ type: "success", message: data.message || "Reply sent successfully" });
         setReply("");
         setActiveQuery(null);
         // Refresh queries list
         fetchQueries();
       } else {
-        setNotification({ type: "error", message: data.message });
+        setNotification({ type: "error", message: data.message || "Failed to send reply" });
       }
     } catch (error) {
       console.error("Error sending reply:", error);

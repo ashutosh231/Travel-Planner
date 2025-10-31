@@ -114,12 +114,20 @@ function HoverCard({ service }) {
         ></div>
 
         <div className="relative">
-          <img
-            src={service.icon}
-            alt={service.title}
-            className="w-full h-56 object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+          {service.icon && service.icon.trim() !== "" ? (
+            <>
+              <img
+                src={service.icon}
+                alt={service.title}
+                className="w-full h-56 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            </>
+          ) : (
+            <div className="w-full h-56 bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+              <span className="text-4xl text-white">🎯</span>
+            </div>
+          )}
         </div>
         <div className="p-6">
           <h3 className="text-2xl font-bold text-white mb-2">{service.title}</h3>

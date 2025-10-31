@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await fetch("http://localhost/Travel-Planner/backend/signup.php", {
+      const response = await fetch(API_ENDPOINTS.SIGNUP, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -159,11 +160,9 @@ const Signup = () => {
                     className={`${inputStyle} cursor-pointer appearance-none`}
                   >
                     <option value="" disabled>Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Non-binary">Non-binary</option>
-                    <option value="Other">Other</option>
-                    <option value="Prefer not to say">Prefer not to say</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
                   </select>
                   <input
                     type="date"
